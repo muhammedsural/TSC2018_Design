@@ -6,6 +6,8 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çap
                 baslık_donatı_adeti,gövde_donatı_adeti,x_koladeti,y_koladeti,plot=1,annotate=1):
 
     """
+    INPUT:
+
     celiksınıfı         : "S220","S420","B420C","B500C" çelik modelleri girilebilir sadece etriye için
     f_co                : Beton basınç dayanımı
     bw                  : Kesitin genişliği [mm]
@@ -20,6 +22,12 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çap
     x_koladeti          : x eksenini kesen sargı kol adeti
     y_koladeti          : y eksenini kesen sargı kol adeti
     plot                : Malzeme modeli çizimi default 1 dir çizimi yapar.
+
+
+    OUTPUT:
+    
+    eps_c: 0 dan ultimate strain değerine kadar 0.00001 adımla oluşturulmuş liste
+    f_c  : Her eps_c değerine karşılık hesaplanmış beton gerilmesi
 
     """
     eps_co = 0.002
@@ -89,7 +97,7 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çap
     eps_cu = 0.004+(1.4*((ro_x+ro_y)/2)*f_sy*eps_su)/f_cc
     eps_cu_sargısız=0.0035
 
-    eps_c = np.arange(0,eps_cu,0.0001)
+    eps_c = np.arange(0,eps_cu,0.00001)
     eps_c_sargısız = np.arange(0,eps_cu_sargısız,0.00001)
     
 
@@ -233,15 +241,15 @@ def celik_modeli(celiksınıfı,E_s = 2*10**5):
     ax.plot(eps_skh,fs_perf[1],'o',c="y")
     ax.plot(eps_ssh,fs_perf[2],'o',c="b")
 
-    ax.annotate(f'f_göçme/eps_göçme = {round(fs_perf[0],2)}/{round(eps_sgö,4)}',
+    ax.annotate(f'f_göçme/eps_göçme = {round(eps_sgö,4)}/{round(fs_perf[0],2)}',
                 xy=(eps_sgö, fs_perf[0]), xytext=(eps_sgö+0.01, fs_perf[0]),
                 arrowprops=dict(facecolor='black', shrink=0.05))
     
-    ax.annotate(f'f_kh/eps_kh = {round(fs_perf[1],2)}/{round(eps_skh,4)}',
+    ax.annotate(f'f_kh/eps_kh = {round(eps_skh,4)}/{round(fs_perf[1],2)}',
                 xy=(eps_skh, fs_perf[1]), xytext=(eps_skh+0.01, fs_perf[1]-10),
                 arrowprops=dict(facecolor='black', shrink=0.05))
     
-    ax.annotate(f'f_sh/eps_sh = {round(fs_perf[2],2)}/{round(eps_ssh,4)}',
+    ax.annotate(f'f_sh/eps_sh = {round(eps_ssh,4)}/{round(fs_perf[2],2)}',
                 xy=(eps_ssh, fs_perf[2]), xytext=(eps_ssh+0.01, fs_perf[2]),
                 arrowprops=dict(facecolor='black', shrink=0.05))
 
