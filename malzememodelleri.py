@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çapı,pas_payı,
-                baslık_donatı_adeti,gövde_donatı_adeti,x_koladeti,y_koladeti,plot=1,annotate=1):
+                baslık_donatı_adeti,gövde_donatı_adeti,x_koladeti,y_koladeti,plot=1,
+                annotate=1):
 
     """
     INPUT:
@@ -230,7 +231,6 @@ def celik_modeli(celiksınıfı,E_s = 2*10**5):
             f_s = f_sy
         elif eps_sh < eps_s <= eps_su:
             f_s = f_su-(f_su-f_sy)*((eps_su-eps_s)**2/(eps_su-eps_sh)**2)
-        
         fs_list.append(f_s)
 
     fig, ax = plt.subplots(figsize=(10,10))
