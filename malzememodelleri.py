@@ -2,8 +2,8 @@ import math as mt
 import numpy as np
 import matplotlib.pyplot as plt
 
-def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çapı,pas_payı,
-                baslık_donatı_adeti,gövde_donatı_adeti,x_koladeti,y_koladeti,plot=1,annotate=1):
+def tbdy_mander(celiksınıfı,f_co,bw,h,s,etriye_çapı,boyuna_donatı_çapı,pas_payı,
+                numBarsTop,numBarsBot,gövde_donatı_adeti,x_koladeti,y_koladeti,plot=1,annotate=1):
 
     """
     INPUT:
@@ -39,36 +39,65 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çap
         "B420C":[420,0.0021,0.008,0.08,1.15],
         "B500C":[500,0.0025,0.008,0.08,1.15]
         }
+
     f_sy = celikler[celiksınıfı][0]
     eps_sy = celikler[celiksınıfı][1]
     eps_sh = celikler[celiksınıfı][2]
     eps_su = celikler[celiksınıfı][3]
     f_su = celikler[celiksınıfı][4]*f_sy
 
+    
+    #Donatı alanları
+    #numBarsTop, numBarsBot, numBarsIntTot
+
+    bar_area = 3.14*boyuna_donatı_çapı**2/4
+
+    top_bar_area = numBarsTop * bar_area
+    int_bar_area = numBarsBot * bar_area
+    bot_bar_area = gövde_donatı_adeti * bar_area
+
+    A_s = top_bar_area + bot_bar_area + int_bar_area
+
     #ke değerinin bulunması
     b_0 = bw-(pas_payı+etriye_çapı/2)*2 #core_x
     h_0 = h-(pas_payı+etriye_çapı/2)*2 #core_y
+    #birim_x = (bw-2*pas_payı-2*etriye_çapı-boyuna_donatı_çapı)/(baslık_donatı_adeti-1) #birim aralık x
+    birim_x_top= (bw-2*pas_payı-2*etriye_çapı-boyuna_donatı_çapı)/(numBarsTop-1)
+    birim_x_bot= (bw-2*pas_payı-2*etriye_çapı-boyuna_donatı_çapı)/(numBarsBot-1)
 
-    birim_x = (bw-2*pas_payı-2*etriye_çapı-boyuna_donatı_çapı)/(baslık_donatı_adeti-1) #birim aralık x
     birim_y =(h-2*pas_payı-2*etriye_çapı-boyuna_donatı_çapı)/(gövde_donatı_adeti+1) #birim aralık y
 
-    ai_x = 2*(baslık_donatı_adeti-1)*birim_x**2
+    #ai_x = 2*(baslık_donatı_adeti-1)*birim_x**2
+    ai_x_top= (numBarsTop-1)*birim_x_top**2
+    ai_x_bot= (numBarsBot-1)*birim_x_bot**2
+    ai_x_total= ai_x_top+ai_x_bot
     ai_y = 2*(gövde_donatı_adeti+1)*birim_y**2
 
-    toplam_ai2 =ai_x+ai_y
+    #toplam_ai2 =ai_x+ai_y
+    toplam_ai2_tot = ai_x_total+ai_y
 
-    a = 1-(toplam_ai2/(6*b_0*h_0))
+    #a = 1-(toplam_ai2/(6*b_0*h_0))
+    a = 1-(toplam_ai2_tot/(6*b_0*h_0))
     b = 1-(s/(2*b_0))
     c = 1-(s/(2*h_0))
     d = (1-(A_s/(b_0*h_0)))**-1
     k_e =round((a*b*c*d),3)
-
     #ro_x = A_sx/(s*b_0)
     #ro_y = A_sx/(s*h_0)
     #Hacimsel oranların bulunması
+    #check kol adetleri
+    x_kol_max = max(numBarsBot,numBarsTop)
+    y_kol_max = gövde_donatı_adeti+2 #Çift sıra başlık donatısı göz ardı edilmiştir.
+
+    if x_koladeti > x_kol_max:
+        x_koladeti = x_kol_max
+        print(f"x_koladeti {x_kol_max} olarak değiştirildi maksimum {x_kol_max} kadar atılabiliyor")
+    if y_koladeti > y_kol_max:
+        y_koladeti = y_kol_max
+        print(f"y_koladeti {y_kol_max} olarak değiştirildi maksimum {y_kol_max} kadar atılabiliyor")
+
     ro_x = round((x_koladeti*3.14*etriye_çapı**2/4)/(s*b_0),5) #hacimsel oran x
     ro_y = round((y_koladeti*3.14*etriye_çapı**2/4)/(s*h_0),5) #hacimsel oran y
-
 
     #f_e değerinin bulunması
     f_ex = round(k_e*ro_x*f_sy,3)
@@ -100,6 +129,70 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,A_s,etriye_çapı,boyuna_donatı_çap
     eps_c = np.arange(0,eps_cu,0.00001)
     eps_c_sargısız = np.arange(0,eps_cu_sargısız,0.00001)
     
+
+    """
+    # Material Properties
+    # ------------------------------------------------------------------------
+    # CONCRETE default değer   
+    # ====================================================================================================         
+    Ec = 5000*Unit.MPa*(fc/Unit.MPa)**0.5     # Young's modulus
+    #Ec = 3250 * fc**0.5 +14000
+    nu = 0.2                        # Poisson's ratio
+    Gc = Ec/(2*(1+nu))              # Shear modulus
+
+    # unconfined concrete
+    Kres = 0.2          # ratio of residual/ultimate to maximum stress
+    fc1U = -fc          # UNCONFINED concrete (todeschini parabolic model), maximum stress
+    eps1U = -0.003      # strain at maximum strength of unconfined concrete
+    fc2U = Kres*fc1U    # ultimate stress
+    eps2U = -0.01       # strain at ultimate stress
+
+    # confined concrete
+    Kfc = 1.2           # ratio of confined to unconfined concrete strength
+    fc1C = Kfc*fc1U     # CONFINED concrete (mander model), maximum stress
+    eps1C = 2*fc1C/Ec   # strain at maximum stres
+    fc2C = Kres*fc1C    # ultimate stress
+    eps2C = 5*eps1C     # strain at ultimate stress 
+
+    # tensile-strength properties
+    Lambda = 0.1        # ratio between unloading slope at eps2 and initial slope Ec
+    fct = 0.14*fc       # tensile strength +tension
+    Ets = fct/0.002     # tension softening stiffness
+
+    # REINFORCING STEEL
+    #============================================================================================================
+    fsy = 500*Unit.MPa     # Yield stress
+    Es = 2*10**5;     # Young's modulus
+    bs = 0.01           # strain-hardening ratio
+    R0 = 18             # control the transition from elastic to plastic branches
+    cR1 = 0.925         # control the transition from elastic to plastic branches
+    cR2 = 0.15          # control the transition from elastic to plastic branches
+
+
+    celikler = {                       fsu/fsy
+        "S220" :[220,0.0011,0.011,0.12,1.20],
+        "S420" :[420,0.0021,0.008,0.08,1.15],
+        "B420C":[420,0.0021,0.008,0.08,1.15],
+        "B500C":[500,0.0025,0.008,0.08,1.15]
+        }
+
+    f_sy = celikler[celiksınıfı][0]
+    eps_sy = celikler[celiksınıfı][1] Donatı çeliğinin akma birim şekildeğiştirmesi
+    eps_sh = celikler[celiksınıfı][2] Donatı çeliğinin pekleşme başlangıcındaki birim şekildeğiştirmesi
+    eps_su = celikler[celiksınıfı][3] Donatı çeliğinin kopma birim şekildeğiştirmesi
+    f_su = celikler[celiksınıfı][4]*f_sy
+
+    steel = [fsy,Es,bs,R0,cR1,cR2]
+
+    # Elastic section properties
+    #==================================================================================================================
+    kCol=1
+
+    Acol = HCol*BCol                  # Cross-sectional area of columns m2
+    Icol = kCol*1/12*BCol*HCol**3     # Effective moment of inertia of columns m4
+
+    """
+
 
     #Performans düzeyleri için beton birim kısalmaları:
     alfa_se = a*b*c
