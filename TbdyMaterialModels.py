@@ -198,14 +198,14 @@ class Mander:
         ro = round(Ash / (s * CoreConcLengthCurrentDirection),5)
         return ro
 
-    def Get_f_e(self,k_e : float, ro_x : float, ro_y : float, f_sy : float,IsConfined : bool = True) -> float:
+    def Get_f_e(self,k_e : float, ro_x : float, ro_y : float, f_ywe : float,IsConfined : bool = True) -> float:
         """Etkili sargilama basincini hesaplar
 
         Args:
             k_e (float): Sargilama etkinlik katsayisi orani
             ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
             ro_y (float): Y dogrultusundaki hacimsel sargi donatisi orani
-            f_sy (float): Donati celiginin akma dayanimi
+            f_syw (float): Donati celiginin akma dayanimi
             IsConfined (bool, optional): Sargili beton mu? Dogru ise True yanlis ise False. Defaults to True.
 
         Returns:
@@ -213,8 +213,8 @@ class Mander:
         """
         f_e = 0.0
         if IsConfined:
-            f_ex = round(k_e*ro_x*f_sy,3)
-            f_ey = round(k_e*ro_y*f_sy,3)
+            f_ex = round(k_e*ro_x*f_ywe,3)
+            f_ey = round(k_e*ro_y*f_ywe,3)
 
             f_e=(f_ex+f_ey)/2
         
@@ -285,8 +285,10 @@ class Mander:
         E_sec = f_cc/eps_cc
         return E_sec
 
+
+
     def Get_eps_cu(self,ro_x : float, ro_y : float, f_sy : float, f_cc : float, eps_su : float) -> float:
-        """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar.
+        """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar. 
 
         Args:
             ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
@@ -298,7 +300,7 @@ class Mander:
         Returns:
             float: Sargili betondaki maksimum basinc birim sekildegistirmesi
         """
-        eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc
+        eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc  #Todo Bu formülasyonda bir sikinti var direk bir formülasyon bulamadim arastir
         return eps_cu
 
     def Get_r(self,E_c : float,E_sec : float) -> float:
@@ -394,8 +396,8 @@ class Mander:
         
         self.ke = self.Get_ke(self.As,self.s,self.bo,self.ho,self.Cumulative_ai_2)
         
-        self.fe_confined   = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.fsy)
-        self.fe_unconfined = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.fsy,IsConfined=False)
+        self.fe_confined   = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.f_ywe)
+        self.fe_unconfined = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.f_ywe,IsConfined=False)
         
         self.lambda_c_confined   = self.Get_Lambda_c(self.fe_confined,self.f_co)
         self.lambda_c_unconfined = self.Get_Lambda_c(self.fe_unconfined,self.f_co)
@@ -481,7 +483,8 @@ class Mander:
         Returns:
             float: göçme öncesi birim şekildeğiştirme sinir değeri
         """
-        eps_cp = 0.0035+0.04*mt.sqrt(omega_we) #<= 0.018   
+        print(0.04*mt.sqrt(omega_we))
+        eps_cp = 0.0035 + 0.04*mt.sqrt(omega_we) #<= 0.018   
 
         if eps_cp > 0.018:
             eps_cp = 0.018
