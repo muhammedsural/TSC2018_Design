@@ -54,7 +54,7 @@ def tbdy_mander(celiksınıfı,f_co,bw,h,s,etriye_çapı,boyuna_donatı_çapı,p
 
     top_bar_area = numBarsTop * bar_area
     int_bar_area = numBarsBot * bar_area
-    bot_bar_area = gövde_donatı_adeti * bar_area
+    bot_bar_area = 2*gövde_donatı_adeti * bar_area
 
     A_s = top_bar_area + bot_bar_area + int_bar_area
 
