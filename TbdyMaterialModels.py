@@ -285,23 +285,21 @@ class Mander:
         E_sec = f_cc/eps_cc
         return E_sec
 
+    # def Get_eps_cu(self,ro_x : float, ro_y : float, f_sy : float, f_cc : float, eps_su : float) -> float:
+    #     """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar. 
 
+    #     Args:
+    #         ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
+    #         ro_y (float): Y dogrultusundaki hacimsel sargi donatisi orani
+    #         f_sy (float): Donati celigi akma dayanimi
+    #         f_cc (float): Sargili beton dayanimi
+    #         eps_su (float): Donati celiginin kopma birim sekildegistirmesi
 
-    def Get_eps_cu(self,ro_x : float, ro_y : float, f_sy : float, f_cc : float, eps_su : float) -> float:
-        """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar. 
-
-        Args:
-            ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
-            ro_y (float): Y dogrultusundaki hacimsel sargi donatisi orani
-            f_sy (float): Donati celigi akma dayanimi
-            f_cc (float): Sargili beton dayanimi
-            eps_su (float): Donati celiginin kopma birim sekildegistirmesi
-
-        Returns:
-            float: Sargili betondaki maksimum basinc birim sekildegistirmesi
-        """
-        eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc  #Todo Bu formülasyonda bir sikinti var direk bir formülasyon bulamadim arastir
-        return eps_cu
+    #     Returns:
+    #         float: Sargili betondaki maksimum basinc birim sekildegistirmesi
+    #     """
+    #     eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc  
+    #     return eps_cu
 
     def Get_r(self,E_c : float,E_sec : float) -> float:
         """Normalize edilmiş elastisite katsayisini hesaplar.
@@ -373,6 +371,32 @@ class Mander:
         
         return df_StressStrain
     
+    def Get_eps_cu(self,fcu : float, eps_cp : float, eps_cc : float, f_cc: float, r : float):
+        """_summary_
+
+        Args:
+            fcu (float): _description_
+            eps_cp (float): _description_
+            eps_cc (float): _description_
+            f_cc (float): _description_
+            r (float): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        eps_c  = np.arange(eps_cp,eps_cp+5,0.0001)
+        eps_cu = 0.0
+        
+        for eps in eps_c:
+            x_birim = self.Get_x(eps,eps_cc)             
+            f_c_birim = round(self.Get_fc(f_cc, x_birim, r),3)
+            
+            if f_c_birim - fcu < 0.001 or f_c_birim == fcu:
+                eps_cu = eps
+                break
+            
+        return eps_cu
+        
     def Set_Variables(self)->None:
         """Hesaplanmasi gereken degerleri hesaplayip set eder."""
         
@@ -395,40 +419,48 @@ class Mander:
         
         
         self.ke = self.Get_ke(self.As,self.s,self.bo,self.ho,self.Cumulative_ai_2)
-        
+        #===================================================================================
         self.fe_confined   = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.f_ywe)
         self.fe_unconfined = self.Get_f_e(self.ke,self.ro_x,self.ro_y,self.f_ywe,IsConfined=False)
-        
+        #===================================================================================
         self.lambda_c_confined   = self.Get_Lambda_c(self.fe_confined,self.f_co)
         self.lambda_c_unconfined = self.Get_Lambda_c(self.fe_unconfined,self.f_co)
-        
+        #===================================================================================
         self.eps_cc_confined   = self.Get_eps_cc(self.lambda_c_confined,self.eps_co)
         self.eps_cc_unconfined = self.Get_eps_cc(self.lambda_c_unconfined,self.eps_co)
-        
+        #===================================================================================
         self.f_cc_confined   = self.Get_f_cc(self.lambda_c_confined,self.f_co)
         self.f_cc_unconfined = self.Get_f_cc(self.lambda_c_unconfined,self.f_co)
         
-        self.eps_cu_confined   = self.Get_eps_cu(self.ro_x,self.ro_y,self.fsy,self.f_cc_confined,self.eps_su)
-        self.eps_cu_unconfined = 0.0035
-        
-        self.Esec_confined   = self.Get_E_secant(self.f_cc_confined,self.eps_cc_confined)
-        self.Esec_unconfined = self.Get_E_secant(self.f_cc_unconfined,self.eps_cc_unconfined)
-        
-        self.r_confined   = self.Get_r(self.Ec,self.Esec_confined)
-        self.r_unconfined = self.Get_r(self.Ec,self.Esec_unconfined)
-        
-        x_confined   = self.Get_x(self.eps_cu_confined,self.eps_cc_confined)
-        x_unconfined = self.Get_x(self.eps_cu_unconfined,self.eps_cc_unconfined)
-        
-        self.f_cu_confined   = self.Get_fc(self.f_cc_confined,x_confined,self.r_confined)
-        self.f_cu_unconfined = self.Get_fc(self.f_cc_unconfined,x_unconfined,self.r_unconfined)
-                
-        #Performans sınırları hesaplamalari
+        #===================================================================================
+        #Göçme öncesi strain sınırı hesaplamalari
         self.alfa_se   = self.Get_Alfa_se(self.As,self.s,self.bo,self.ho,self.Cumulative_ai_2)
         self.ro_sh_min = min(self.ro_x,self.ro_y)
         self.omega_we  = self.Get_Omega_we(self.alfa_se,self.ro_sh_min,self.f_ywe,self.f_ce)
         
         self.eps_cp    = self.Get_eps_cp(self.omega_we)
+        #===================================================================================
+                
+        self.Esec_confined   = self.Get_E_secant(self.f_cc_confined,self.eps_cc_confined)
+        self.Esec_unconfined = self.Get_E_secant(self.f_cc_unconfined,self.eps_cc_unconfined)
+        
+        self.r_confined   = self.Get_r(self.Ec,self.Esec_confined)
+        self.r_unconfined = self.Get_r(self.Ec,self.Esec_unconfined)
+        #===================================================================================
+        # Kopma basinc gerilmesi maximum basınc gerilmesinin %10 daha az degeri olarak dusunulmustur. Buna karsılık gelen kopma birim sekildegistirmesi
+        # hesabı yapilmaktadir. Bu noktada kesitteki etriyenin koptugu veya boyuna donatinin burkuldugu kabul edilir.
+        f = round(self.f_cc_confined - (self.f_cc_confined * 0.1),3)
+        self.eps_cu_confined   = self.Get_eps_cu(f, self.eps_cp, self.eps_cc_confined, self.f_cc_confined, self.r_confined)
+        self.eps_cu_unconfined = 0.0035
+        #===================================================================================        
+        x_confined   = self.Get_x(self.eps_cu_confined,self.eps_cc_confined)
+        x_unconfined = self.Get_x(self.eps_cu_unconfined,self.eps_cc_unconfined)
+        #===================================================================================
+        self.f_cu_confined   = self.Get_fc(self.f_cc_confined,x_confined,self.r_confined)
+        self.f_cu_unconfined = self.Get_fc(self.f_cc_unconfined,x_unconfined,self.r_unconfined)
+        #===================================================================================        
+        #Performans sınırları hesaplamalari
+        
         self.eps_ls    = self.Get_eps_ls(self.eps_cp)
         
         x_cp           = self.Get_x(self.eps_cp,self.eps_cc_confined)
@@ -483,7 +515,6 @@ class Mander:
         Returns:
             float: göçme öncesi birim şekildeğiştirme sinir değeri
         """
-        print(0.04*mt.sqrt(omega_we))
         eps_cp = 0.0035 + 0.04*mt.sqrt(omega_we) #<= 0.018   
 
         if eps_cp > 0.018:
@@ -513,19 +544,19 @@ class Mander:
         ax.grid()
 
         #Confined model plot
-        ax.plot(df_confined["eps_c"],df_confined["fc"],label="Confined model")
-        ax.plot(self.eps_cc_confined, self.f_cc_confined,'o', c="y",  label = f"{round(self.eps_cc_confined,4)}/{round(self.f_cc_confined,2)}")
-        ax.plot(self.eps_cu_confined, self.f_cu_confined,'o', c="black" , label = f"{round(self.eps_cu_confined,4)}/{round(self.f_cu_confined,2)}")
+        ax.plot(df_confined["eps_c"],df_confined["fc"],label="Confined")
+        ax.plot(self.eps_cc_confined, self.f_cc_confined,'o', c="y"     , label = f"eps_cc/f_cc = {round(self.eps_cc_confined,4)}/{round(self.f_cc_confined,2)}")
+        ax.plot(self.eps_cu_confined, self.f_cu_confined,'o', c="black" , label = f"eps_cu/f_cu = {round(self.eps_cu_confined,4)}/{round(self.f_cu_confined,2)}")
 
         #Performance levels plot
-        ax.plot(self.eps_cp, self.f_cp,'*', c="red",  label = f"{round(self.eps_cp,4)}/{round(self.f_cp,2)}")
-        ax.plot(self.eps_ls, self.f_ls,'*', c="green",  label = f"{round(self.eps_ls,4)}/{round(self.f_ls,2)}")
-        ax.plot(self.eps_io, self.f_io,'*', c="blue",  label = f"{round(self.eps_io,4)}/{round(self.f_io,2)}")
+        ax.plot(self.eps_cp, self.f_cp,'*', c="red",   label = f"eps_cp/f_cp = {round(self.eps_cp,4)}/{round(self.f_cp,2)}")
+        ax.plot(self.eps_ls, self.f_ls,'*', c="green", label = f"eps_ls/f_ls = {round(self.eps_ls,4)}/{round(self.f_ls,2)}")
+        ax.plot(self.eps_io, self.f_io,'*', c="blue",  label = f"eps_io/f_io = {round(self.eps_io,4)}/{round(self.f_io,2)}")
 
         #Unconfined model plot
-        ax.plot(df_unconfined["eps_c"],df_unconfined["fc"],label="Unconfined model")
-        ax.plot(self.eps_cc_unconfined, self.f_cc_unconfined, 'o', c="g", label = f"{self.eps_cc_unconfined}/{self.f_cc_unconfined}")
-        ax.plot(self.eps_cu_unconfined, self.f_cu_unconfined, 'o', c="r", label = f"{round(self.eps_cu_unconfined,4)}/{round(self.f_cu_unconfined,2)}")
+        ax.plot(df_unconfined["eps_c"],df_unconfined["fc"],label="Unconfined")
+        ax.plot(self.eps_cc_unconfined, self.f_cc_unconfined, 's', c="g", label = f"eps_cc/f_cc = {self.eps_cc_unconfined}/{self.f_cc_unconfined}")
+        ax.plot(self.eps_cu_unconfined, self.f_cu_unconfined, 's', c="r", label = f"eps_cu/f_cu = {round(self.eps_cu_unconfined,4)}/{round(self.f_cu_unconfined,2)}")
 
         ax.set_xlabel('Strain (mm)')  # Add an x-label to the axes.
         ax.set_ylabel('Stress (MPa)')  # Add a y-label to the axes.
@@ -534,6 +565,7 @@ class Mander:
         ax.legend()
         plt.show()
 
+    
 
 class SteelModel:
     
@@ -606,4 +638,42 @@ class SteelModel:
 
 
         return(eps_s_list,fs_list)
-    
+
+
+# def main():
+#     """Units N,mm"""
+#     B = 300
+#     H = 300
+#     s = 80
+#     TieRebarDiameter = 10
+#     LongnitRebarDiameter = 20
+#     ClearCoverConc = 30
+#     NumBarsTop,NumBarsInterior,NumBarsBot = 4,2,4
+#     X_tiebars = 2
+#     Y_tiebars = 3
+#     fsy = 420
+#     fywe = 420
+#     eps_su = 0.08
+#     f_co = 30
+#     f_ce = 30
+
+#     mander = Mander(B                    = B,
+#                         H                    = H,
+#                         s                    = s,
+#                         TieRebarDiameter     = TieRebarDiameter,
+#                         LongnitRebarDiameter = LongnitRebarDiameter,
+#                         ClearCoverConc       = ClearCoverConc,
+#                         NumBarsTop           = NumBarsTop,
+#                         NumBarsInterior      = NumBarsInterior,
+#                         NumBarsBot           = NumBarsBot,
+#                         X_tiebars            = X_tiebars,
+#                         Y_tiebars            = Y_tiebars,
+#                         fsy                  = fsy,
+#                         f_ywe                = fywe,
+#                         eps_su               = eps_su,
+#                         f_co                 = f_co,
+#                         f_ce                 = f_ce
+#                         )
+
+# if __name__ == "__main__":
+#     main()
