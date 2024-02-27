@@ -125,7 +125,7 @@ class ConfimentRebarSpace:
         return bk / koladet
 
     def GetRebarArea(self,RebarDiameter : float) -> float:
-        confrebararea = 3.14 * (RebarDiameter/10)**2 / 4
+        confrebararea = 3.14 * (RebarDiameter)**2 / 4
         return confrebararea
 
     def GetAshw_i(self,koladet : int,confrebararea : float) -> float:
@@ -140,10 +140,10 @@ class ConfimentRebarSpace:
 
     def Check_a_i(self,ai : float,confrebardia : float):
         if ai > 25*(confrebardia/10):
-            print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai} > {25*confrebardia} - TBDY-7.3.4.2")
+            print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai}mm > {25*confrebardia}mm - TBDY-7.3.4.2")
 
-        if ai > 30:
-            print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai} > 30 - TS500 7.4.1")
+        if ai > 300:
+            print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai}mm > 300mm - TS500 7.4.1")
             
     def CheckNd(self,Nd : float,Ac : float, fck : float) -> bool:
         """Nd değerinin (0.2 * Ac * fck) değerinden büyük veya küçük eşit olma durumunu inceler. Büyükse False küçükse True döndürür.
@@ -173,11 +173,11 @@ class ConfimentRebarSpace:
         Returns:
             float: maximum uç sarılma bölgesi etriye aralığı
         """
-        s1 = 5 # TBDY2018
-        s2 = 15 # TBDY2018
+        s1 = 50 # TBDY2018
+        s2 = 150 # TBDY2018
         s3 = b_min/3 # TBDY2018
-        s4 = 6 * LongRebar / 10 # TBDY2018
-        s5 = 12 * LongRebar/ 10 # TS500
+        s4 = 6 * LongRebar  # TBDY2018
+        s5 = 12 * LongRebar # TS500
         s_max = min(s2,s3,s4,s5)
 
         if s_max < s1 :
@@ -188,16 +188,16 @@ class ConfimentRebarSpace:
     def OrtaSarilmaBolgesiKontrolleri(self,b_min : float,LongRebar : int) -> float:
         s1 = 150
         s2 = b_min/3
-        s3 = 12 * LongRebar/10 # TS500
-        # s4 = 6 * LongRebar / 10 # TBDY2018
+        s3 = 12 * LongRebar # TS500
+        # s4 = 6 * LongRebar # TBDY2018
         s_max = min(s1,s2,s3)
 
         return s_max
 
     def DigerSarilmaBolgesiKontrolleri(self, b_min : float,LongRebar : int) -> float:
-        s1 = 20
+        s1 = 200
         s2 = b_min/2
-        s3 = floor(12 * LongRebar/ 10) # TS500
+        s3 = floor(12 * LongRebar) # TS500
         s_max = min(s1,s2,s3)
         return s_max
     
@@ -232,7 +232,7 @@ class ConfimentRebarSpace:
         return Ash
 
     def OptimizeConfinmentRebarSpace(self,smax : float,Ash : float, Nd : float, Ac : float, fck : float, fywk : float, Ack : float, bkx : float, bky : float) -> int:
-        s    = [i for i in range(5,21)]   # cm
+        s    = [i for i in range(50,210)]   # cm
         s_ideal = 0
         for s_opt in s :
             if s_opt > smax:
@@ -240,45 +240,102 @@ class ConfimentRebarSpace:
             NdControl = self.CheckNd(Nd,Ac,fck)
             Ashmin_dikd = self.MinEnineDonatiOraniDikdörtgen(s_opt,bkx,bky,Ac,Ack,fck,fywk,NdControl)
             if Ash < Ashmin_dikd:
-                print(f"Ash = {Ash} < Ash_min = {Ashmin_dikd} kesitteki çiroz,etriye arttırılmalı ve/veya sargı donatı çapı büyütülmeli...")
+                if s_opt == 50:
+                    #info :  İlk iterasyonda Ash_min değerinin altında kalıyorsa diğerlerinde zaten sağlayamaz s_opt değeri 50mm e eşitlenip uyarı verilir.
+                    print(f"Ash = {Ash}mm2 < Ash_min = {Ashmin_dikd}mm2 kesitteki çiroz,etriye arttırılmalı ve/veya sargı donatı çapı büyütülmeli...")
+                    break
                 s_ideal = s_opt
                 break
             s_ideal = s_opt
 
         return s_ideal
 
-def main() -> None:
-    """Units N,mm"""
-    Nd     = 16000 
-    B = 300
-    H = 500
-    s = 250
-    TieRebarDiameter = 8
-    LongnitRebarDiameter = 14
-    ClearCoverConc = 25
-    NumBarsTop,NumBarsInterior,NumBarsBot = 2,1,2
-    X_tiebars = 2
-    Y_tiebars = 3
-    fsy = 220
-    fywe = 220
-    eps_su = 0.08
-    f_co = 25
-    f_ce = 25
-    ETRIYEARALIKLARI = ConfimentRebarSpace(Nd, B/10, H/10, ClearCoverConc/10, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
-    print(f"Uç sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptEndConfArea},\nOrta sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptMiddleConfArea},\nSarılma bölgesi dışındaki optimum etriye aralığı : {ETRIYEARALIKLARI.s_OtherConfAreaMax}")
-    
-#     Nd     = 16000 
-#     Width  = 30 # cm
-#     Height = 50 # cm
-#     Cover  = 2.5 # cm
-#     x_kol  = 4
-#     y_kol  = 4
-#     fck    = 25   # N/mm2 
-#     fywk   = 420  # N/mm2 
-#     ConfRebarDia = 8  # mm
-#     LognRebarDia = 14 # mm
+    def Get_lb(self, fsy : float, fctd : float, LognRebarDia : float, Nervur : bool = True, LocationClass : int = 2):
+        """TS 500’de çekme donatısı için verilen kenetlenme boyunu hesaplar
 
-#     ETRIYEARALIKLARI = ConfimentRebarSpace(Nd,Width,Height,Cover,x_kol,y_kol,fck,fywk,ConfRebarDia,LognRebarDia)
+        Args:
+            fsy (float): Boyuna donatı tasarım akma dayanımı
+            fctd (float): Beton tasarım eksenel çekme dayanımı
+            LognRebarDia (float): Boyuna donatı çapı (çeşitli çaplar varsa, en büyüğü)
+            Nervur (bool, optional): Nervür donatimi kullanılan. Defaults to True.
+            LocationClass (int, optional): Konum 1 mi veya konum 2 mi. Defaults to 2.
+
+        Raises:
+            ValueError: Konum bilgisi yanlışsa döndürülür.
+
+        Returns:
+            _type_: kenetlenme boyu
+        """
+        # 
+        
+        lb = 0.12 * (fsy/fctd) * LognRebarDia
+        minlimit = 20 * LognRebarDia
+        
+        if lb < minlimit :
+            lb = minlimit
+        
+        if LocationClass == 1 :
+            lb = 1.4 * lb
+            
+        if LocationClass != 1 and LocationClass != 2:
+            raise ValueError("Konum tanımı 1 veya 2 olmalıdır...")
+        
+        if Nervur != True:
+            lb = 2 * lb
+        
+        return lb
+    
+    def Get_EndRegionConfinmentLength(self, b_max : float, ln : float):
+        """Uç sarılma bölgelerinin uzunluklarını hesaplar.
+
+        Args:
+            b_max (float): kolon en büyük kesit boyutu
+            ln (float): kolon serbest yüksekliği
+
+        Returns:
+            _type_: Uç sarılma bölgelerinin uzunlukları
+        """
+        l1 = 1.5 * b_max
+        l2 = 500
+        l3 = ln/6
+        l = max(l1,l2,l3)
+        return l
+        
+        
+        
+        
+# def main() -> None:
+#     """Units N,mm"""
+#     Nd     = 16000 
+#     B = 300
+#     H = 500
+#     s = 250
+#     TieRebarDiameter = 8
+#     LongnitRebarDiameter = 14
+#     ClearCoverConc = 25
+#     NumBarsTop,NumBarsInterior,NumBarsBot = 2,1,2
+#     X_tiebars = 2
+#     Y_tiebars = 3
+#     fsy = 220
+#     fywe = 220
+#     eps_su = 0.08
+#     f_co = 25
+#     f_ce = 25
+#     ETRIYEARALIKLARI = ConfimentRebarSpace(Nd, B/10, H/10, ClearCoverConc/10, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
 #     print(f"Uç sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptEndConfArea},\nOrta sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptMiddleConfArea},\nSarılma bölgesi dışındaki optimum etriye aralığı : {ETRIYEARALIKLARI.s_OtherConfAreaMax}")
-if __name__ == "__main__":
-    main()
+    
+# #     Nd     = 16000 
+# #     Width  = 30 # cm
+# #     Height = 50 # cm
+# #     Cover  = 2.5 # cm
+# #     x_kol  = 4
+# #     y_kol  = 4
+# #     fck    = 25   # N/mm2 
+# #     fywk   = 420  # N/mm2 
+# #     ConfRebarDia = 8  # mm
+# #     LognRebarDia = 14 # mm
+
+# #     ETRIYEARALIKLARI = ConfimentRebarSpace(Nd,Width,Height,Cover,x_kol,y_kol,fck,fywk,ConfRebarDia,LognRebarDia)
+# #     print(f"Uç sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptEndConfArea},\nOrta sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptMiddleConfArea},\nSarılma bölgesi dışındaki optimum etriye aralığı : {ETRIYEARALIKLARI.s_OtherConfAreaMax}")
+# if __name__ == "__main__":
+#     main()
