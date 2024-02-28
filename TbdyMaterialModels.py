@@ -285,21 +285,21 @@ class Mander:
         E_sec = f_cc/eps_cc
         return E_sec
 
-    # def Get_eps_cu(self,ro_x : float, ro_y : float, f_sy : float, f_cc : float, eps_su : float) -> float:
-    #     """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar. 
+    def Get_eps_cu2(self,ro_x : float, ro_y : float, f_sy : float, f_cc : float, eps_su : float) -> float:
+        """Sargili betondaki maksimum basinc birim sekildegistirmesini hesaplar. 
 
-    #     Args:
-    #         ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
-    #         ro_y (float): Y dogrultusundaki hacimsel sargi donatisi orani
-    #         f_sy (float): Donati celigi akma dayanimi
-    #         f_cc (float): Sargili beton dayanimi
-    #         eps_su (float): Donati celiginin kopma birim sekildegistirmesi
+        Args:
+            ro_x (float): X dogrultusundaki hacimsel sargi donatisi orani
+            ro_y (float): Y dogrultusundaki hacimsel sargi donatisi orani
+            f_sy (float): Donati celigi akma dayanimi
+            f_cc (float): Sargili beton dayanimi
+            eps_su (float): Donati celiginin kopma birim sekildegistirmesi
 
-    #     Returns:
-    #         float: Sargili betondaki maksimum basinc birim sekildegistirmesi
-    #     """
-    #     eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc  
-    #     return eps_cu
+        Returns:
+            float: Sargili betondaki maksimum basinc birim sekildegistirmesi
+        """
+        eps_cu = 0.004 + (1.4 * ((ro_x + ro_y) / 2) * f_sy * eps_su) / f_cc  
+        return eps_cu
 
     def Get_r(self,E_c : float,E_sec : float) -> float:
         """Normalize edilmiş elastisite katsayisini hesaplar.
@@ -566,7 +566,6 @@ class Mander:
         plt.show()
 
     
-
 class SteelModel:
     
     def SteelHardening(self,celiksınıfı,E_s = 2*10**5):
@@ -639,41 +638,3 @@ class SteelModel:
 
         return(eps_s_list,fs_list)
 
-
-# def main():
-#     """Units N,mm"""
-#     B = 300
-#     H = 300
-#     s = 80
-#     TieRebarDiameter = 10
-#     LongnitRebarDiameter = 20
-#     ClearCoverConc = 30
-#     NumBarsTop,NumBarsInterior,NumBarsBot = 4,2,4
-#     X_tiebars = 2
-#     Y_tiebars = 3
-#     fsy = 420
-#     fywe = 420
-#     eps_su = 0.08
-#     f_co = 30
-#     f_ce = 30
-
-#     mander = Mander(B                    = B,
-#                         H                    = H,
-#                         s                    = s,
-#                         TieRebarDiameter     = TieRebarDiameter,
-#                         LongnitRebarDiameter = LongnitRebarDiameter,
-#                         ClearCoverConc       = ClearCoverConc,
-#                         NumBarsTop           = NumBarsTop,
-#                         NumBarsInterior      = NumBarsInterior,
-#                         NumBarsBot           = NumBarsBot,
-#                         X_tiebars            = X_tiebars,
-#                         Y_tiebars            = Y_tiebars,
-#                         fsy                  = fsy,
-#                         f_ywe                = fywe,
-#                         eps_su               = eps_su,
-#                         f_co                 = f_co,
-#                         f_ce                 = f_ce
-#                         )
-
-# if __name__ == "__main__":
-#     main()

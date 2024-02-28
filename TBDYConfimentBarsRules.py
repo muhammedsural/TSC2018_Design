@@ -1,10 +1,13 @@
 from dataclasses import dataclass, field
-from math import floor
+import math
 
 
 @dataclass
-class ConfimentRebarSpace:
+class ConfimentDesign:
     Nd                      : float
+    Fsy                     : float
+    Fctd                    : float
+    Ln                      : float            
     Width                   : float
     Height                  : float
     Cover                   : float
@@ -14,6 +17,7 @@ class ConfimentRebarSpace:
     Fywk                    : float
     ConfimentRebarDiameter  : float
     LongnitudeRebarDiameter : float
+    
     Ac                      : float = field(init=False)
     Ack                     : float = field(init=False)
     bkx                     : float = field(init=False)
@@ -23,6 +27,10 @@ class ConfimentRebarSpace:
     Ashx                    : float = field(init=False)
     Ashy                    : float = field(init=False)
     Ash                     : float = field(init=False)
+    Lb                      : float = field(init=False)
+    EndConfLength           : float = field(init=False)
+    MidConfLength           : float = field(init=False)
+    OtherConfLength         : float = field(init=False)
     s_EndConfAreaMax        : float = field(init=False)
     s_MiddleConfAreaMax     : float = field(init=False)
     s_OtherConfAreaMax      : float = field(init=False)
@@ -45,6 +53,12 @@ class ConfimentRebarSpace:
         self.Ashy                = self.GetAshw_i(self.Ykol,ConfRebarArea)
         self.Ash                 = self.Ashx + self.Ashy
         bmin                     = min(self.Height,self.Width)
+        bmax                     = max(self.Height,self.Width)
+        
+        self.EndConfLength       = self.Get_EndRegionConfinmentLength(bmax,self.Ln)
+        self.Lb                  = self.Get_lb(self.Fsy, self.Fctd, self.LongnitudeRebarDiameter)
+        self.MidConfLength       = self.Lb
+        self.OtherConfLength     = self.Ln - 2 * self.EndConfLength - self.MidConfLength
 
         self.s_EndConfAreaMax    = self.UcSarilmaBolgesiKontrolleri(self.LongnitudeRebarDiameter,bmin)
         self.s_MiddleConfAreaMax = self.OrtaSarilmaBolgesiKontrolleri(bmin,self.LongnitudeRebarDiameter)
@@ -71,6 +85,8 @@ class ConfimentRebarSpace:
                                                                     bkx= self.bkx,
                                                                     bky= self.bky
                                                                     )
+        
+        self.Get_DesignConfinment(self.ConfimentRebarDiameter, bmax, self.Ln, self.EndConfLength, self.s_OptEndConfArea, self.Lb, self.MidConfLength, self.s_OptMiddleConfArea, self.OtherConfLength, self.s_OtherConfAreaMax)
 
     def GetAc(self,Height : float, Width : float)->float:
         """Brüt enkesit alanını hesaplar
@@ -197,7 +213,7 @@ class ConfimentRebarSpace:
     def DigerSarilmaBolgesiKontrolleri(self, b_min : float,LongRebar : int) -> float:
         s1 = 200
         s2 = b_min/2
-        s3 = floor(12 * LongRebar) # TS500
+        s3 = math.floor(12 * LongRebar) # TS500
         s_max = min(s1,s2,s3)
         return s_max
     
@@ -300,42 +316,39 @@ class ConfimentRebarSpace:
         l3 = ln/6
         l = max(l1,l2,l3)
         return l
-        
-        
-        
-        
-# def main() -> None:
-#     """Units N,mm"""
-#     Nd     = 16000 
-#     B = 300
-#     H = 500
-#     s = 250
-#     TieRebarDiameter = 8
-#     LongnitRebarDiameter = 14
-#     ClearCoverConc = 25
-#     NumBarsTop,NumBarsInterior,NumBarsBot = 2,1,2
-#     X_tiebars = 2
-#     Y_tiebars = 3
-#     fsy = 220
-#     fywe = 220
-#     eps_su = 0.08
-#     f_co = 25
-#     f_ce = 25
-#     ETRIYEARALIKLARI = ConfimentRebarSpace(Nd, B/10, H/10, ClearCoverConc/10, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
-#     print(f"Uç sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptEndConfArea},\nOrta sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptMiddleConfArea},\nSarılma bölgesi dışındaki optimum etriye aralığı : {ETRIYEARALIKLARI.s_OtherConfAreaMax}")
     
-# #     Nd     = 16000 
-# #     Width  = 30 # cm
-# #     Height = 50 # cm
-# #     Cover  = 2.5 # cm
-# #     x_kol  = 4
-# #     y_kol  = 4
-# #     fck    = 25   # N/mm2 
-# #     fywk   = 420  # N/mm2 
-# #     ConfRebarDia = 8  # mm
-# #     LognRebarDia = 14 # mm
+    def Get_DesignConfinment(self,
+                             TieRebarDiameter : int,
+                             bmax : float, 
+                             ln : float, 
+                             UcSarilmaBolgesiUzunlugu : float, 
+                             s_OptEndConfArea : int, 
+                             lb : float,
+                             OrtaSarilmaBolgesiUzunlugu : float, 
+                             s_OptMiddleConfArea : int,
+                             SarilmaBolgesiDisindaKalanUzunluk : float, 
+                             s_OtherConfAreaMax : int) -> None:
+        """Tasarim sargi donatilarini hesaplar.
 
-# #     ETRIYEARALIKLARI = ConfimentRebarSpace(Nd,Width,Height,Cover,x_kol,y_kol,fck,fywk,ConfRebarDia,LognRebarDia)
-# #     print(f"Uç sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptEndConfArea},\nOrta sarılma bölgesi optimum etriye aralığı : {ETRIYEARALIKLARI.s_OptMiddleConfArea},\nSarılma bölgesi dışındaki optimum etriye aralığı : {ETRIYEARALIKLARI.s_OtherConfAreaMax}")
-# if __name__ == "__main__":
-#     main()
+        Args:
+            TieRebarDiameter (int): Sargi donati capi
+            bmax (float): En buyuk kesit yuzeyi
+            ln (float): Doseme ust kotundan yukariya dogru veya kolona baglanan yuksekligi en buyuk kirisin alt yuzunden baslayarak asagiya dodru olculen kolon serbest yuksekligi
+            UcSarilmaBolgesiUzunlugu (float): Uc sarima bolgesi uzunlugu
+            s_OptEndConfArea (int): Uc sarilma bolgesi optimum etriye araligi
+            lb (float): Kenetlenme boyu
+            OrtaSarilmaBolgesiUzunlugu (float): Orta sarima bolgesi uzunlugu
+            s_OptMiddleConfArea (int): Orta sarilma bolgesi optimum etriye araligi
+            SarilmaBolgesiDisindaKalanUzunluk (float): Sarilma bolgesi olmayan uzunluk
+            s_OtherConfAreaMax (int): Sarilma bolgesi disindaki optimum etriye araligi
+        """
+        
+        UcSarilmaBolgesiEtriyeAdeti = math.ceil(UcSarilmaBolgesiUzunlugu / s_OptEndConfArea ) + 1
+        OrtaSarilmaBolgesiEtriyeAdeti = math.ceil(OrtaSarilmaBolgesiUzunlugu / s_OptMiddleConfArea) + 1
+        SarilmaBolgesiDisindaEtriyeAdeti = math.ceil(SarilmaBolgesiDisindaKalanUzunluk / s_OtherConfAreaMax) + 2
+        
+        EtriyeAdeti = 2*UcSarilmaBolgesiEtriyeAdeti + OrtaSarilmaBolgesiEtriyeAdeti + SarilmaBolgesiDisindaEtriyeAdeti
+        print(f"Etriye Adeti - Etriye Çapi / SarilmaDisiAralik / OrtaSarilmadakiAralik / UcSarilmaAralik = {EtriyeAdeti} - ∅{TieRebarDiameter} / {math.floor(s_OtherConfAreaMax/10)} / {math.floor(s_OptMiddleConfArea/10)} / {math.floor(s_OptEndConfArea/10)}")
+        
+        
+
