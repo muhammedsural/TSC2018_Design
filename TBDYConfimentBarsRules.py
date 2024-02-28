@@ -348,7 +348,7 @@ class ConfimentDesign:
         SarilmaBolgesiDisindaEtriyeAdeti = math.ceil(SarilmaBolgesiDisindaKalanUzunluk / s_OtherConfAreaMax) + 2
         
         EtriyeAdeti = 2*UcSarilmaBolgesiEtriyeAdeti + OrtaSarilmaBolgesiEtriyeAdeti + SarilmaBolgesiDisindaEtriyeAdeti
-        print(f"Etriye Adeti - Etriye Çapi / SarilmaDisiAralik / OrtaSarilmadakiAralik / UcSarilmaAralik = {EtriyeAdeti} - ∅{TieRebarDiameter} / {math.floor(s_OtherConfAreaMax/10)} / {math.floor(s_OptMiddleConfArea/10)} / {math.floor(s_OptEndConfArea/10)}")
+        print(f"Kolon Serbest Bölgesindeki Etriye Adeti - Etriye Çapi / SarılmaDışıAralık / OrtaSarılmadakiAralık / UçSarılmaAralık = {EtriyeAdeti} - ∅{TieRebarDiameter} / {math.floor(s_OtherConfAreaMax/10)} / {math.floor(s_OptMiddleConfArea/10)} / {math.floor(s_OptEndConfArea/10)}")
         
         
 
