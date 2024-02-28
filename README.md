@@ -2,14 +2,18 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 
 - [x] Dikdörtgen kolonlarda sargı donatısı tasarımı.
 - [x] TBDY-2018 deprem yönetmeliğinde EK5-A da belirtilen sargılı ve sargısız mander beton modeli ile çelik modelinin python yardımı ile oluşturulması.
+- [x] TBDY2018 bölüm 3'te verilen spektrum grafiklerinin çıkarılması.
+- [ ] Verilen bilgilere göre BYS sınıfı ve yapılabilecek maximum bina yüksekliğinin bulunması
+- [ ] Verilen bilgilere göre performans hedeflerinin bulunması
+- [ ] TBDY2018' e uygun R ve D katsayıları önermesi
 
 # Örnek Çalışma
 
 ## 1- Modüllerin import edilmesi
 
 ```python
-from TbdyMaterialModels import Mander
-from TBDYConfimentBarsRules import ConfimentDesign as cd
+from TSCMaterialModels import Mander
+from TSCConfimentBarsRules import ConfimentDesign as cd
 ```
 
 ## 2- Kullanılacak değerler
@@ -74,4 +78,32 @@ mander.Plot_Manders()
 ```
 ![ManderPlot](Resource/ExampleManderPlot.png)
 
+## TBDY2018 Hedef Spektrumların Elde Edilmesi
+TBDY2018 de verilen spektrumları elde etmek için sismik girdiler için oluşturulan `SeismicInputs` sınıfından faydalanıyoruz. Bu sınıfı spektrum değerlerini hesaplaması için oluşturulmuş `SeismicTSC` sınıfının girdisi olarak verildiğinde tüm değerler hesaplanmış olacak.
+```python
+SeismicVariables = SeismicInputs(lat        = 39.85, 
+                                 lon        = 30.2, 
+                                 soil       = "ZC", 
+                                 intensity  = "DD2",
+                                 R          = 8.0,
+                                 D          = 3.0,
+                                 I          = 1.0)
+rs = SeismicTSC(Variables = SeismicVariables)
+rs.plot_HorizontalElasticSpectrum()
+```
+![ElasticResponseSpectrums](Resource/ElasticResponseSpectrums.png)
 
+`SeismicTSC` içerisindeki `ElasticSpectrums` değişkeninden periyotlar,spektral ivmeler, spektral deplasmanlar,düşey spektral ivmeler, deprem yükü azaltma katsayıları ve azaltılmış spektral ivmeleri içeren pandas DataFrame yapısına erişilebilir.
+```python
+rs.ElasticSpectrums.head(10)
+```
+![df_Spectrums](Resource/df_Spectrums.png)
+
+Bu sınıfın referansını `SeismicTSC` sınıfına girdi olarak verdiğimizden dolayı bu referans üzerinden hesaplanan tüm değerler `SeismicVariables` sınıfında da saklanmış olur. Formatlanmış bir şekilde tüm sismik girdiler görüntülenebilir.
+```python
+SeismicVariables
+```
+![SeismicVariables](Resource/SeismicVariables.png)
+
+Afaddan alınan gerçek değerler aşağıdaki gibidir. Yaklaşık olarak hesaplanan değerlere çok yakın çıkmaktadır.
+![TDTH_Spectrum](Resource/TDTH_Spectrum.png)
