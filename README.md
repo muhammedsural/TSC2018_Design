@@ -53,7 +53,7 @@ s = ConfinmentDesign.s_OptEndConfArea
 ```
 52
 
-## 3- TBDY2018 malzeme modelleri
+## 4- TBDY2018 malzeme modelleri
 ![Mander](Resource/TBDY_Mander_part.png)
 ```python
 mander = Mander(B                    = B,
@@ -78,7 +78,7 @@ mander.Plot_Manders()
 ```
 ![ManderPlot](Resource/ExampleManderPlot.png)
 
-## TBDY2018 Hedef Spektrumların Elde Edilmesi
+## 5-TBDY2018 Hedef Spektrumların Elde Edilmesi
 TBDY2018 de verilen spektrumları elde etmek için sismik girdiler için oluşturulan `SeismicInputs` sınıfından faydalanıyoruz. Bu sınıfı spektrum değerlerini hesaplaması için oluşturulmuş `SeismicTSC` sınıfının girdisi olarak verildiğinde tüm değerler hesaplanmış olacak.
 ```python
 SeismicVariables = SeismicInputs(lat        = 39.85, 
