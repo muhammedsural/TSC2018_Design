@@ -106,4 +106,5 @@ SeismicVariables
 ![SeismicVariables](Resource/SeismicVariables.png)
 
 Afaddan alınan gerçek değerler aşağıdaki gibidir. Yaklaşık olarak hesaplanan değerlere çok yakın çıkmaktadır.
+
 ![TDTH_Spectrum](Resource/TDTH_Spectrum.png)
