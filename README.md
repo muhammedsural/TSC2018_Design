@@ -50,7 +50,7 @@ s = ConfinmentDesign.s_OptEndConfArea
 52
 
 ## 3- TBDY2018 malzeme modelleri
-![Mander](Resource\TBDY_Mander_part.png)
+![Mander](Resource/TBDY_Mander_part.png)
 ```python
 mander = Mander(B                    = B,
                 H                    = H,
@@ -72,6 +72,6 @@ mander = Mander(B                    = B,
 
 mander.Plot_Manders()
 ```
-![ManderPlot](.\Resource\ExampleManderPlot.png)
+![ManderPlot](Resource/ExampleManderPlot.png)
 
 
