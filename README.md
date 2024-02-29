@@ -14,6 +14,7 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 ```python
 from TSCMaterialModels import Mander
 from TSCConfimentBarsRules import ConfimentDesign as cd
+from TSCResponseSpectra import SeismicInputs,SeismicTSC
 ```
 
 ## 2- Kullanılacak değerler
