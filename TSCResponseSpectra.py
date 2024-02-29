@@ -2,6 +2,8 @@ import pandas as pd
 from dataclasses import dataclass,field
 from numpy import array,round,arange,nan,interp,polyfit,poly1d,pi
 import scipy as sc
+from enum import Enum
+
 
 @dataclass
 class SeismicInputs:
@@ -35,10 +37,12 @@ class SeismicInputs:
     lon       : float  = field(default_factory=float)
     soil      : str    = field(default_factory=str)
     intensity : str    = field(default_factory=str)
+    Hn        : float = field(default=10)
     R         : float  = field(default=8.)
     D         : float  = field(default=3.)
     I         : float  = field(default=1.)
-    DTS       : str    = field(default="-")
+    DTS       : str    = field(default="1") 
+    BYS       : int    = field(default=1) 
     Ss        : float  = field(default=0.)
     S1        : float  = field(default=0.)
     PGA       : float  = field(default=0.)
@@ -52,7 +56,7 @@ class SeismicInputs:
     TL        : float  = field(default=6.)
 
     def __repr__(self) -> str:
-        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}\nR :{self.R}\nD :{self.D}\nI :{self.I}\nDTS :{self.DTS}\nSs :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1 }\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
+        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}\nR :{self.R}\nD :{self.D}\nI :{self.I}\nDTS :{self.DTS}\nBYS :{self.BYS}\nSs :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1 }\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
 
     def dict(self) -> dict:
         """Class property lerini sözlük olarak döndürür.
@@ -73,15 +77,25 @@ class SeismicInputs:
         del dumy
         return dumy_df
 
+@dataclass
+class SeismicResistanceBuildingInputs:
+    R         : float  = field(default=8.)
+    D         : float  = field(default=3.)
+    I         : float  = field(default=1.)
+    DTS       : str    = field(default="1") 
+    BYS       : int    = field(default=1)
+
 
 @dataclass
 class SeismicTSC:
     Variables : SeismicInputs = field(default_factory=SeismicInputs)
+    
 
     def __post_init__(self) -> None:
         self.__GetSpectralMapVariables(self.Variables.lat , self.Variables.lon)
         self.__Get_SpectrumCoefficients()
         self.__GetDTS()
+        self.__GetMaxBYS(Hn=self.Variables.Hn,Dts=self.Variables.DTS)
         self.__Get_TA()
         self.__Get_TB()
         self.ElasticSpectrums = self.__HorizontalElasticSpectrum()
@@ -182,6 +196,34 @@ class SeismicTSC:
             self.Variables.DTS = "1a"
             if self.Variables.I ==2 or self.Variables.I == 3:
                 self.Variables.DTS = "1"
+    # BUG BYS sınır değerlerinde hatalı veriyor kontrol edilmeli
+    def __GetMaxBYS(self,Hn : float, Dts : str): 
+        """TBDY2018 Tablo 3.3 e göre BYS sinifini bulur.
+
+        Args:
+            Hn (float): Bina Toplam Yüksekliği [m]
+            Dts (str): Deprem tasarim sinifi
+        """
+        if Dts in ["1","1a","2","2a"]:
+            dts = 0
+        if Dts in ["3","3a"]:
+            dts = 1
+        if Dts in ["4","4a"]:
+            dts = 1
+        
+        BYS = {
+            1 : [70.1,91.1,105.1],
+            2 : [56.1,70.1,91.1],
+            3 : [42.1,56.1,56.1],
+            4 : [28.1,42.1,42.1],
+            5 : [17.6,28.1,28.1],
+            6 : [10.6,17.6,17.6],
+            7 : [7.1,10.6,10.6],
+            8 : [0,0,0]
+        }
+        df_bys = pd.DataFrame(BYS).T
+        self.BYS = df_bys[dts][df_bys[dts] < Hn].index[0]
+        del BYS,dts,df_bys
         
     
     def __Get_TA(self) -> float:
@@ -310,12 +352,11 @@ class SeismicTSC:
         plt.show()
 
 
-def main() ->None:
-    SeismicVariables = SeismicInputs(lat = 39.85, lon = 30.2, soil ="ZC", intensity="DD2")
-    rs = SeismicTSC(Variables = SeismicVariables)
-    rs.plot_HorizontalElasticSpectrum()
-    # ts = TargetSpectrum()
-    # ts.HorizontalElasticSpectrum(Ss = 0.2 , S1 = 0.2, soil = 'ZC')
+# def main() ->None:
+#     SeismicVariables = SeismicInputs(lat = 39.85, lon = 30.2, soil ="ZC", intensity="DD2")
+#     rs = SeismicTSC(Variables = SeismicVariables)
+#     rs.plot_HorizontalElasticSpectrum()
     
-if __name__ == "__main__":
-    main()
+    
+# if __name__ == "__main__":
+#     main()
