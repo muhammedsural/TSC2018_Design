@@ -1,0 +1,46 @@
+on: [check_run]
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.7', '3.8','3.8','3.10','3.11','3.12']
+
+    name: Runs tests with python ${{ matrix.python-version }} using ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture : x64
+
+    - name: Update pip
+      run: python -m pip install --upgrade --user pip
+
+    - name: Install package
+      run: python -m pip install -e .
+
+    - name: Setup Python
+      uses: actions/setup-python@v4.7.1
+      with:
+        # Version range or exact version of Python or PyPy to use, using SemVer's version range syntax. Reads from .python-version if unset.
+        python-version: ${{ matrix.python-version }}
+        # File containing the Python version to use. Example: .python-version
+        python-version-file: pip
+        # Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.
+        cache: x64
+        # The target architecture (x86, x64) of the Python or PyPy interpreter.
+        #architecture:
+        # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+        #check-latest: # optional
+        # The token used to authenticate when fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+        token: ${{secrets.TEST_PYPI_API_TOKEN }}
+        # Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.
+        #cache-dependency-path: # optional
+        # Set this option if you want the action to update environment variables.
+       # update-environment: # optional, default is true
+        # When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython.
+       # allow-prereleases: # optional
