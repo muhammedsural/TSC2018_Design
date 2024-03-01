@@ -1,5 +1,5 @@
 import pandas as pd
-from dataclasses import dataclass,field
+from dataclasses import dataclass,field,asdict
 from numpy import array,round,arange,nan,interp,polyfit,poly1d,pi
 import scipy as sc
 from enum import Enum
