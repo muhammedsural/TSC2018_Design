@@ -368,6 +368,157 @@ class SeismicTSC:
         ax.set_title("TSC-2018 Design Elastic Spectrum",fontsize = 16)  # Add a title to the axes.
         plt.show()
 
+class TimeSeriesSpectra:
+    
+    def calc_timegap(Td : float, damp_ratio : float, T : float) -> float:
+        """
+        INFO
+            "Required time gap between mainshock and aftershock for dynamic analysis of structures" makalesinde iki ardışık deprem arasında doğal hareketi sıfırlamak için gerekli olan zaman aralığının hesaplanmasındaki  önerilen formülasyon kullanılmıştır.
+        INPUT
+            Td          : Kuvvetli yer hareketi süresi
+            damp_ratio  : Yapının sönüm oranı
+            T           : Yapının doğal titreşim periyodu
+        OUTPUT
+            R_timegap = durgun geçmesi gereken zaman (sn)
+        """
+        R_rest = Td*(0.05/damp_ratio)*(((21.8559*T)+0.0258)*(Td**(-0.9982))+0.0214)
+        R_timegap = round(R_rest,0)
+        return R_timegap
+    
+    def ReadRecord (filePath:str,gap:float,g=9.81,plot=1) -> pd.DataFrame:
+        acceleration = []
+
+        with open(filePath,"r") as file:
+            for count,line in enumerate(file):
+                if count >= 4:
+                    #newfile = filePath.split('/')[-1].rsplit(".VT2")[0].rsplit(".AT2")[0].rsplit(".DT2")[0]
+                    #dosya = open(newfile.join(".txt"),"w",encoding="utf-8")
+                    #for satir in line:
+                    #    dosya.write(line)
+                    #dosya.close()
+                    for i in line.strip().split():
+                        acceleration.append(float(i)*g)
+                if count == 3:
+                    npts = float(line.replace(",","").replace("SEC","").split()[1])
+                    dt = float(line.replace(",","").replace("SEC","").split()[3])
+        time = np.arange(0,npts*dt,dt)
+        
+        if gap is not None:
+            timegap = np.arange(time[-1],time[-1]+gap+dt,dt)
+            accgap  = np.arange(0,len(timegap))*0
+        
+            time = np.append(time,timegap)
+            acceleration = np.append(acceleration,accgap)
+        
+        if plot == 1:
+            import matplotlib.pyplot as plt 
+            fig, ax = plt.subplots(figsize=(20,10))
+            fig.subplots_adjust(bottom=0.15, left=0.2)
+            ax.grid()
+            ax.plot(time,acceleration)
+            ax.set_xlabel('Time [Sec]')
+            ax.set_ylabel('Acceleration [cm/sn2]')
+            #ax.axhline(0, color='black', lw=2)
+            if g == 1:
+                ax.set_ylabel('Acceleration [g]')
+        TimeSeries = pd.DataFrame(columns=["Time","Acceleration"])
+        
+        TimeSeries["Time"] = time
+        TimeSeries["Acceleration"] = acceleration
+
+        return TimeSeries
+        
+    def load_PEERNGA_record(filepath):
+
+        '''
+            Load record in .at2 format (PEER NGA Databases)
+
+            Input:
+                filepath : file path for the file to be load
+                
+            Returns:
+            
+                acc : vector wit the acceleration time series
+                dt : time step
+                npts : number of points in record
+                eqname : string with year_name_station_component info
+
+        '''
+
+        import numpy as np
+
+        with open(filepath) as fp:
+            line = next(fp)
+            line = next(fp).split(',')
+            year = (line[1].split('/'))[2]
+            eqname = (year + '_' + line[0].strip() + '_' + 
+                    line[2].strip() + '_comp_' + line[3].strip())
+            line = next(fp)
+            line = next(fp).split(',')
+            npts = int(line[0].split('=')[1])
+            dt = float(line[1].split('=')[1].split()[0])
+            acc = np.array([p for l in fp for p in l.split()]).astype(float)
+        
+        return acc,dt,npts,eqname
+
+    def TimeSeriesSpectra(self,Acceleration : pd.Series , Time : pd.Series ) -> pd.DataFrame:    
+        """Piece-Wise exact method yardimi ile yer ivmesi kaydini spektral ivme kaydina cevirir """
+        sampling_interval = Time[1]-Time[0]
+        damping_ratio = 0.05
+        Sd = []
+        Sv = []
+        Sa = []
+        
+        T = np.arange(0.05, 6.0,.01)
+        for i in T:
+            omega = 2*np.pi/i 
+            mass = 1 
+            k = ((omega)**2)*mass
+            c = 2*mass*omega*damping_ratio
+            K = k+3*c/sampling_interval + 6*mass/(sampling_interval**2)
+            a = 6*mass / sampling_interval + 3*c
+            b = 3*mass + sampling_interval*c/2
+            u= [0]
+            v= [0]
+            ac= [0] 
+            for j in range(len(Acceleration)-1) :
+                df = - ( Acceleration[j+1] - Acceleration[j])+ a*v[j] + b*ac[j] # delta force
+                du = df / K
+                dv = 3*du / sampling_interval - 3*v[j] - sampling_interval * ac[j] /2    
+                dac = 6* (du - sampling_interval*v[j]) / (sampling_interval**2) - 3* ac[j]
+                u.append(u[j] + du)
+                v.append(v[j] + dv)
+                ac.append(ac[j] + dac)
+            Sd.append(max([abs(x) for x in u]))
+            #Sv.append(max([abs(x) for x in v]))
+            #Sa.append(max([abs(x) for x in ac]))
+
+            Sv.append(Sd[-1]*omega)
+            Sa.append(Sd[-1]*omega**2)
+
+          
+        # plt.figure(figsize=[10,5] );
+        # plt.suptitle(' Response Spectra' )
+        # plt.subplot(3,1,1),plt.plot(T,Sd) ; plt.ylabel('Sd (m)') ; plt.grid()
+        # plt.subplot(3,1,2),plt.plot(T,Sv) ; plt.ylabel('Sv (m/s)'); plt.grid()
+        # plt.subplot(3,1,3),plt.plot(T,Sa) ; plt.ylabel('Sa (m/s2)'); plt.grid()
+
+        dump_dict = {'Periods' : T, 'Sa' : Sa, 'Sv' : Sv, 'Sd' : Sd}
+        Spec_variables = pd.DataFrame(dump_dict)
+        del dump_dict
+
+        return Spec_variables
+    
+    def LocationSeriesSpectra(self,T : float,Accelertions : pd.Series,Periods : pd.Series) -> float:
+        """Verilen doğal titreşim periyodunun zaman serisinden elde edilen spektrumunda karsilik gelen spektral ivme değerini verir. Zaman serisinin spektrumlarinin(spektral ivme,spektral deplasman ve hiz) hesabi için TimeSeriesSpectra fonksiyonunu kullanin"""
+
+        #issue: verilen periyod listede yoksa 0 dönecektir enterpolasyonla spektral ivme değeri bulunabilir...
+        targetSa = 0
+        for index,T_series in enumerate(Periods):
+            if round(T_series,2) == T:
+                targetSa = Accelertions[index]
+                break
+        return round(targetSa,4)
 
 # def main() ->None:
 #     SeismicVariables = SeismicInputs(lat = 39.85, lon = 30.2, soil ="ZC", intensity="DD2")
