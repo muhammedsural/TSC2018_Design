@@ -1,6 +1,6 @@
 import pandas as pd
 from dataclasses import dataclass,field,asdict
-from numpy import array,round,arange,nan,interp,polyfit,poly1d,pi
+import numpy as np 
 import scipy as sc
 from enum import Enum
 
@@ -144,7 +144,7 @@ class SeismicTSC:
 
             z = afad_spectra_params_df[ f"{column_name}-{self.SeismicVariables.intensity}"].to_list()
 
-            interpolator = sc.interpolate.CloughTocher2DInterpolator( array([x,y]).T , z)
+            interpolator = sc.interpolate.CloughTocher2DInterpolator( np.array([x,y]).T , z)
 
             spectral_value = round( interpolator( self.SeismicVariables.lat, self.SeismicVariables.lon)  , 3 )
             spectral_value_dict[column_name] = spectral_value
@@ -182,7 +182,7 @@ class SeismicTSC:
             self.SeismicVariables.Fs = FS_table[self.SeismicVariables.soil][-1]
             self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs    
         else:
-            self.SeismicVariables.Fs = round( interp(self.SeismicVariables.Ss,Ss_range, FS_table[self.SeismicVariables.soil]) , 3) 
+            self.SeismicVariables.Fs = round( np.interp(self.SeismicVariables.Ss,Ss_range, FS_table[self.SeismicVariables.soil]) , 3) 
             self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs
 
         # 1sec period
@@ -193,7 +193,7 @@ class SeismicTSC:
             self.SeismicVariables.F1 = F1_table[self.SeismicVariables.soil][-1]
             self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
         else:
-            self.SeismicVariables.F1 = round(interp(self.SeismicVariables.S1, S1_range, F1_table[self.SeismicVariables.soil]), 3)
+            self.SeismicVariables.F1 = round(np.interp(self.SeismicVariables.S1, S1_range, F1_table[self.SeismicVariables.soil]), 3)
             self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
 
 
@@ -254,7 +254,7 @@ class SeismicTSC:
     def __HorizontalElasticSpectrum(self)-> pd.DataFrame:
         """TBDY yatay elastik tasarim spektrumu"""
 
-        T_list = arange(0.0, self.SeismicVariables.TL,.005)
+        T_list = np.arange(0.0, self.SeismicVariables.TL,.005)
             
         Sa = []
         
@@ -299,7 +299,7 @@ class SeismicTSC:
                 Sve.append( 0.8 * self.SeismicVariables.SDs * TBD / T)
                 continue
             elif T> TLD:
-                Sve.append( nan )
+                Sve.append( np.nan )
                 continue
         self.ElasticSpectrums["Sve"] = Sve
 
