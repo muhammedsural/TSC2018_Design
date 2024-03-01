@@ -1,3 +1,5 @@
+import pandas as pd
+from dataclasses import dataclass,field,asdict
 
 #TODO bu bölümdeki geliştirmeler devam etmektedir.
 
