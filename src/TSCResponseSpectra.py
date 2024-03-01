@@ -14,9 +14,6 @@ class SeismicInputs:
         soil      : soil class
         intensity : intensity level 
                         options: DD1, DD2, DD3, DD4
-        R         : Yapi davranis katsayisi
-        D         : Overstrength factor (Dayanim fazlalagi katsayisi)
-        I         : Building important factor (Bina onem katsayisi)
         Ss        : Kisa periyot harita katsayisi
         S1        : 1 sn periyot harita katsayisi
         soil      : Zemin sinifi
@@ -37,12 +34,6 @@ class SeismicInputs:
     lon       : float  = field(default_factory=float)
     soil      : str    = field(default_factory=str)
     intensity : str    = field(default_factory=str)
-    Hn        : float = field(default=10)
-    R         : float  = field(default=8.)
-    D         : float  = field(default=3.)
-    I         : float  = field(default=1.)
-    DTS       : str    = field(default="1") 
-    BYS       : int    = field(default=1) 
     Ss        : float  = field(default=0.)
     S1        : float  = field(default=0.)
     PGA       : float  = field(default=0.)
@@ -56,7 +47,7 @@ class SeismicInputs:
     TL        : float  = field(default=6.)
 
     def __repr__(self) -> str:
-        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}\nR :{self.R}\nD :{self.D}\nI :{self.I}\nDTS :{self.DTS}\nBYS :{self.BYS}\nSs :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1 }\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
+        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}\nSs :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1 }\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
 
     def dict(self) -> dict:
         """Class property lerini sözlük olarak döndürür.
@@ -79,23 +70,59 @@ class SeismicInputs:
 
 @dataclass
 class SeismicResistanceBuildingInputs:
+    """
+    Args:
+        Hn        : Bina serbest yüksekliği [m]
+        R         : Yapi davranis katsayisi
+        D         : Overstrength factor (Dayanim fazlalagi katsayisi)
+        I         : Building important factor (Bina onem katsayisi)
+        DTS       : Deprem tasarim sinifi 
+        BYS       : Bina yükseklik sinifi
+    """
+    Hn        : float  = field(default=10)
     R         : float  = field(default=8.)
     D         : float  = field(default=3.)
     I         : float  = field(default=1.)
     DTS       : str    = field(default="1") 
     BYS       : int    = field(default=1)
 
+    def __repr__(self) -> str:
+        return f"Hn :{self.Hn}\nR :{self.R}\nD :{self.D}\nI :{self.I}\nDTS :{self.DTS}\nBYS :{self.BYS}"
+
+    def dict(self) -> dict:
+        """Class property lerini sözlük olarak döndürür.
+
+        Returns:
+            dict: Class propertylerini içeren sözlük
+        """
+        return asdict(self)
+    
+    def convert_dataframe(self) -> pd.DataFrame:
+        """Class property lerini pandas DataFrame olarak döndürür.
+
+        Returns:
+            dict: Class propertylerini içeren DataFrame
+        """
+        dumy = self.dict()
+        dumy_df = pd.DataFrame([dumy.keys(),dumy.values()]).T
+        del dumy
+        return dumy_df
+
 
 @dataclass
 class SeismicTSC:
-    Variables : SeismicInputs = field(default_factory=SeismicInputs)
-    
+    SeismicVariables  : SeismicInputs = field(default_factory=SeismicInputs)
+    BuildingVariables : SeismicResistanceBuildingInputs = field(default_factory=SeismicResistanceBuildingInputs)
 
     def __post_init__(self) -> None:
-        self.__GetSpectralMapVariables(self.Variables.lat , self.Variables.lon)
+        self.SetVariables()
+    
+    def SetVariables(self) ->None:
+        """Hesaplanmasi gereken değerleri hesaplar ve set eder."""
+        self.__GetSpectralMapVariables()
         self.__Get_SpectrumCoefficients()
         self.__GetDTS()
-        self.__GetMaxBYS(Hn=self.Variables.Hn,Dts=self.Variables.DTS)
+        self.__GetMaxBYS()
         self.__Get_TA()
         self.__Get_TB()
         self.ElasticSpectrums = self.__HorizontalElasticSpectrum()
@@ -103,13 +130,8 @@ class SeismicTSC:
         self.__VerticalElasticSpektrum()
         self.__ReducedTargetSpectrum()
  
-    def __GetSpectralMapVariables(self, Latitude : float, Longitude : float) -> None:
-        """Spektrum haritasinda verilen koordinatlara göre spektral harita değerlerini bulur
-
-        Args:
-            Latitude (float): Enlem
-            Longitude (float): Boylam
-        """
+    def __GetSpectralMapVariables(self) -> dict:
+        """Spektrum haritasinda verilen koordinatlara göre spektral harita değerlerini bulur"""
         afad_spectra_params_df = pd.read_csv("Resource\AFAD_TDTH_parametre.csv")   
 
         # grid locattions
@@ -120,19 +142,17 @@ class SeismicTSC:
         spectral_value_dict = {}
         for column_name in ["Ss","S1","PGA","PGV"]:
 
-            z = afad_spectra_params_df[ f"{column_name}-{self.Variables.intensity}"].to_list()
+            z = afad_spectra_params_df[ f"{column_name}-{self.SeismicVariables.intensity}"].to_list()
 
             interpolator = sc.interpolate.CloughTocher2DInterpolator( array([x,y]).T , z)
 
-            spectral_value = round( interpolator( self.Variables.lat, self.Variables.lon)  , 3 )
+            spectral_value = round( interpolator( self.SeismicVariables.lat, self.SeismicVariables.lon)  , 3 )
             spectral_value_dict[column_name] = spectral_value
         
-        self.Variables.Ss = spectral_value_dict["Ss"]
-        self.Variables.S1 = spectral_value_dict["S1"]
-        self.Variables.PGA = spectral_value_dict["PGA"]
-        self.Variables.PGV = spectral_value_dict["PGV"]
-
-        del afad_spectra_params_df,spectral_value_dict
+        self.SeismicVariables.Ss = spectral_value_dict["Ss"]
+        self.SeismicVariables.S1 = spectral_value_dict["S1"]
+        self.SeismicVariables.PGA = spectral_value_dict["PGA"]
+        self.SeismicVariables.PGV = spectral_value_dict["PGV"]
 
     def __Get_SpectrumCoefficients(self)->None:
         # Spectral values
@@ -152,63 +172,61 @@ class SeismicTSC:
                     "ZD": [2.4 , 2.2 , 2.0 , 1.9 , 1.8 , 1.7],
                     "ZE": [4.2 , 3.3 , 2.8 , 2.4 , 2.2 , 2.0]}
 
+        
+
         # Short period
-        if self.Variables.Ss < Ss_range[0]:
-            self.Variables.Fs = FS_table[self.Variables.soil][0]
-            self.Variables.SDs = self.Variables.Ss * self.Variables.Fs
-        elif self.Variables.Ss > Ss_range[-1]:
-            self.Variables.Fs = FS_table[self.Variables.soil][-1]
-            self.Variables.SDs = self.Variables.Ss * self.Variables.Fs    
+        if self.SeismicVariables.Ss < Ss_range[0]:
+            self.SeismicVariables.Fs = FS_table[self.SeismicVariables.soil][0]
+            self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs
+        elif self.SeismicVariables.Ss > Ss_range[-1]:
+            self.SeismicVariables.Fs = FS_table[self.SeismicVariables.soil][-1]
+            self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs    
         else:
-            self.Variables.Fs = round( interp(self.Variables.Ss,Ss_range, FS_table[self.Variables.soil]) , 3) 
-            self.Variables.SDs = self.Variables.Ss * self.Variables.Fs
+            self.SeismicVariables.Fs = round( interp(self.SeismicVariables.Ss,Ss_range, FS_table[self.SeismicVariables.soil]) , 3) 
+            self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs
 
         # 1sec period
-        if self.Variables.S1 < S1_range[0] :
-            self.Variables.F1 = F1_table[self.Variables.soil][0]
-            self.Variables.SD1 = self.Variables.S1 * self.Variables.F1
-        elif self.Variables.S1 > S1_range[-1]:
-            self.Variables.F1 = F1_table[self.Variables.soil][-1]
-            self.Variables.SD1 = self.Variables.S1 * self.Variables.F1
+        if self.SeismicVariables.S1 < S1_range[0] :
+            self.SeismicVariables.F1 = F1_table[self.SeismicVariables.soil][0]
+            self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
+        elif self.SeismicVariables.S1 > S1_range[-1]:
+            self.SeismicVariables.F1 = F1_table[self.SeismicVariables.soil][-1]
+            self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
         else:
-            self.Variables.F1 = round(interp(self.Variables.S1, S1_range, F1_table[self.Variables.soil]), 3)
-            self.Variables.SD1 = self.Variables.S1 * self.Variables.F1
-        
+            self.SeismicVariables.F1 = round(interp(self.SeismicVariables.S1, S1_range, F1_table[self.SeismicVariables.soil]), 3)
+            self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
+
+
         del Ss_range,FS_table,S1_range,F1_table
    
     def __GetDTS(self) -> None:
         """Deprem tasarim sinifini bulur."""
-        if self.Variables.SDs < .33 : 
-            self.Variables.DTS = "4a"
-            if self.Variables.I ==2 or self.Variables.I == 3:
-                self.Variables.DTS = "4"
+        if self.SeismicVariables.SDs < .33 : 
+            self.BuildingVariables.DTS = "4a"
+            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
+                self.BuildingVariables.DTS = "4"
                 
-        if self.Variables.SDs >= 0.33 and self.Variables.SDs < 0.50 : 
-            self.Variables.DTS = "3a"
-            if self.Variables.I ==2 or self.Variables.I == 3:
-                self.Variables.DTS = "3"
+        if self.SeismicVariables.SDs >= 0.33 and self.SeismicVariables.SDs < 0.50 : 
+            self.BuildingVariables.DTS = "3a"
+            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
+                self.BuildingVariables.DTS = "3"
                 
-        if self.Variables.SDs >= 0.50 and self.Variables.SDs < 0.75 :
-            self.Variables.DTS = "2a" 
-            if self.Variables.I ==2 or self.Variables.I == 3:
-                self.Variables.DTS = "2"
-        if self.Variables.SDs >= 0.75 : 
-            self.Variables.DTS = "1a"
-            if self.Variables.I ==2 or self.Variables.I == 3:
-                self.Variables.DTS = "1"
-    # BUG BYS sınır değerlerinde hatalı veriyor kontrol edilmeli
-    def __GetMaxBYS(self,Hn : float, Dts : str): 
-        """TBDY2018 Tablo 3.3 e göre BYS sinifini bulur.
-
-        Args:
-            Hn (float): Bina Toplam Yüksekliği [m]
-            Dts (str): Deprem tasarim sinifi
-        """
-        if Dts in ["1","1a","2","2a"]:
+        if self.SeismicVariables.SDs >= 0.50 and self.SeismicVariables.SDs < 0.75 :
+            self.BuildingVariables.DTS = "2a" 
+            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
+                self.BuildingVariables.DTS = "2"
+        if self.SeismicVariables.SDs >= 0.75 : 
+            self.BuildingVariables.DTS = "1a"
+            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
+                self.BuildingVariables.DTS = "1"
+    
+    def __GetMaxBYS(self): 
+        """TBDY2018 Tablo 3.3 e göre BYS sinifini bulur."""
+        if self.BuildingVariables.DTS in ["1","1a","2","2a"]:
             dts = 0
-        if Dts in ["3","3a"]:
+        if self.BuildingVariables.DTS in ["3","3a"]:
             dts = 1
-        if Dts in ["4","4a"]:
+        if self.BuildingVariables.DTS in ["4","4a"]:
             dts = 1
         
         BYS = {
@@ -222,38 +240,37 @@ class SeismicTSC:
             8 : [0,0,0]
         }
         df_bys = pd.DataFrame(BYS).T
-        self.BYS = df_bys[dts][df_bys[dts] < Hn].index[0]
+        self.BuildingVariables.BYS = df_bys[dts][df_bys[dts] < self.BuildingVariables.Hn].index[0]
         del BYS,dts,df_bys
         
-    
     def __Get_TA(self) -> float:
         """Yatay elastik tasarim spektrum sol köşe periyodu."""
-        self.Variables.TA = 0.2 * self.Variables.SD1 / self.Variables.SDs
+        self.SeismicVariables.TA = 0.2 * self.SeismicVariables.SD1 / self.SeismicVariables.SDs
 
     def __Get_TB(self) -> float:
         """Yatay elastik tasarim elastik spektrum sağ köşe periyodu"""
-        self.Variables.TB = self.Variables.SD1 / self.Variables.SDs
+        self.SeismicVariables.TB = self.SeismicVariables.SD1 / self.SeismicVariables.SDs
     
     def __HorizontalElasticSpectrum(self)-> pd.DataFrame:
         """TBDY yatay elastik tasarim spektrumu"""
 
-        T_list = arange(0.0, self.Variables.TL,.005)
+        T_list = arange(0.0, self.SeismicVariables.TL,.005)
             
         Sa = []
         
         for i in T_list:
             
-            if i <self.Variables.TA:
-                Sa.append(round((0.4 + 0.6*(i/self.Variables.TA))*self.Variables.SDs, 4))
+            if i <self.SeismicVariables.TA:
+                Sa.append(round((0.4 + 0.6*(i/self.SeismicVariables.TA))*self.SeismicVariables.SDs, 4))
                 
-            elif i >= self.Variables.TA and i <= self.Variables.TB:
-                Sa.append(round(self.Variables.SDs, 4))
+            elif i >= self.SeismicVariables.TA and i <= self.SeismicVariables.TB:
+                Sa.append(round(self.SeismicVariables.SDs, 4))
                 
-            elif i>self.Variables.TB and i <= self.Variables.TL:
-                Sa.append(round(self.Variables.SD1/i, 4))
+            elif i>self.SeismicVariables.TB and i <= self.SeismicVariables.TL:
+                Sa.append(round(self.SeismicVariables.SD1/i, 4))
                 
-            elif i> self.Variables.TL:
-                Sa.append(round(self.Variables.SD1 * self.Variables.TL/(i**2), 4))
+            elif i> self.SeismicVariables.TL:
+                Sa.append(round(self.SeismicVariables.SD1 * self.SeismicVariables.TL/(i**2), 4))
                 
         target_spec = {"T" : T_list,"Sae" : Sa}
 
@@ -269,17 +286,17 @@ class SeismicTSC:
     
     def __VerticalElasticSpektrum(self) -> None:
         """Dusey elastik dizayn spektrumu"""
-        TAD , TBD , TLD = self.Variables.TA / 3 , self.Variables.TB / 3 , self.Variables.TL / 2
+        TAD , TBD , TLD = self.SeismicVariables.TA / 3 , self.SeismicVariables.TB / 3 , self.SeismicVariables.TL / 2
         Sve = []
         for T in self.ElasticSpectrums["T"] :
             if T < TAD :
-                Sve.append(( 0.32 + 0.48*(T/TAD))* self.Variables.SDs)
+                Sve.append(( 0.32 + 0.48*(T/TAD))* self.SeismicVariables.SDs)
                 continue
             elif T >= TAD and T <= TBD:
-                Sve.append(0.8 * self.Variables.SDs)
+                Sve.append(0.8 * self.SeismicVariables.SDs)
                 continue
             elif T> TBD and T <= TLD:
-                Sve.append( 0.8 * self.Variables.SDs * TBD / T)
+                Sve.append( 0.8 * self.SeismicVariables.SDs * TBD / T)
                 continue
             elif T> TLD:
                 Sve.append( nan )
@@ -297,10 +314,10 @@ class SeismicTSC:
         Returns:
             float: Deprem yükü azaltma katsayısı
         """
-        if T > self.Variables.TB:
-            Ra = self.Variables.R / self.Variables.I
+        if T > self.SeismicVariables.TB:
+            Ra = self.BuildingVariables.R / self.BuildingVariables.I
         else:
-            Ra = self.Variables.D + ((self.Variables.R/self.Variables.I)-self.Variables.D)*(T/self.Variables.TB)
+            Ra = self.BuildingVariables.D + ((self.BuildingVariables.R/self.BuildingVariables.I)-self.BuildingVariables.D)*(T/self.SeismicVariables.TB)
         return Ra
     
     def __ReducedTargetSpectrum(self) -> None:
@@ -312,27 +329,27 @@ class SeismicTSC:
         self.ElasticSpectrums["SaR"] = SaR
         del SaR,RaT,Tw
 
-    def __Get_Sae_Tp(self,T : float) -> float:
-        """ Binanin doğal titreşim periyoduna denk gelen elastik spektrum değerini bulur. """
+    def Get_Sae_Tp(self,T : float) -> float:
+        """ Binanin doğal titreşim periyoduna denk gelen elastik spektrum ivme değerini bulur. """
 
-        if T < self.Variables.TA:
-            Sae = round((0.4 + 0.6*(T/self.Variables.TA))*self.Variables.SDs, 4)
+        if T < self.SeismicVariables.TA:
+            Sae = round((0.4 + 0.6*(T/self.SeismicVariables.TA))*self.SeismicVariables.SDs, 4)
             
-        elif T >= self.Variables.TA and T<=self.Variables.TB:
-           Sae = round(self.Variables.SDs, 4)
+        elif T >= self.SeismicVariables.TA and T<=self.SeismicVariables.TB:
+           Sae = round(self.SeismicVariables.SDs, 4)
             
-        elif T > self.Variables.TB and T <= self.Variables.TL:
-            Sae = round(self.Variables.SD1/T, 4)
+        elif T > self.SeismicVariables.TB and T <= self.SeismicVariables.TL:
+            Sae = round(self.SeismicVariables.SD1/T, 4)
             
-        elif T>self.Variables.TL:
-            Sae = round(self.Variables.SD1 * self.Variables.TL / (T**2), 4)
+        elif T>self.SeismicVariables.TL:
+            Sae = round(self.SeismicVariables.SD1 * self.SeismicVariables.TL / (T**2), 4)
         
         return round(Sae,4)
     
-    def __Get_SaR_Tp(self,T : float) -> float:
+    def Get_SaR_Tp(self,T : float) -> float:
         """Verilen periyoda göre azaltilmiş elastik tasarim spektrum ivmesini hesaplar"""
         Ra = self.__Get_Ra(T)
-        Sae = self.__Get_Sae_Tp(T)
+        Sae = self.Get_Sae_Tp(T)
         return round(Sae / Ra,4)        
     
     def plot_HorizontalElasticSpectrum(self) -> None:
