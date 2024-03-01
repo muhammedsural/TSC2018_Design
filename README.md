@@ -6,6 +6,7 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 - [x] TBDY2018 bölüm 3'te verilen spektrum grafiklerinin çıkarılması.
 - [x] Verilen bilgilere göre BYS sınıfı ve yapılabilecek maximum bina yüksekliğinin bulunması.
 - [ ] Deprem kaydı seçimi, ivme kaydı okunması, spektral ivme,hız ve deplasman serilerinin çıkarılması ve ölçekleme işlemlerinin yapılması.
+- [ ] Lifli polimer ile sargılanan kolonlarda dayanım ve süneklilik artışının hesabı 
 - [ ] Verilen bilgilere göre performans hedeflerinin bulunması.
 - [ ] TBDY2018'e uygun R ve D katsayıları önermesi.
 - [ ] TBDY2018'e göre Eşdeğer deprem yüklerinin bulunması.
