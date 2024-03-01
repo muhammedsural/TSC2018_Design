@@ -132,7 +132,7 @@ class SeismicTSC:
  
     def __GetSpectralMapVariables(self) -> dict:
         """Spektrum haritasinda verilen koordinatlara göre spektral harita değerlerini bulur"""
-        afad_spectra_params_df = pd.read_csv("Resource\AFAD_TDTH_parametre.csv")   
+        afad_spectra_params_df = pd.read_csv("Resource\\AFAD_TDTH_parametre.csv")   
 
         # grid locattions
         x = afad_spectra_params_df["LAT"].to_list()
@@ -146,7 +146,7 @@ class SeismicTSC:
 
             interpolator = sc.interpolate.CloughTocher2DInterpolator( np.array([x,y]).T , z)
 
-            spectral_value = round( interpolator( self.SeismicVariables.lat, self.SeismicVariables.lon)  , 3 )
+            spectral_value = np.round( interpolator( self.SeismicVariables.lat, self.SeismicVariables.lon)  , 3 )
             spectral_value_dict[column_name] = spectral_value
         
         self.SeismicVariables.Ss = spectral_value_dict["Ss"]
@@ -182,7 +182,7 @@ class SeismicTSC:
             self.SeismicVariables.Fs = FS_table[self.SeismicVariables.soil][-1]
             self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs    
         else:
-            self.SeismicVariables.Fs = round( np.interp(self.SeismicVariables.Ss,Ss_range, FS_table[self.SeismicVariables.soil]) , 3) 
+            self.SeismicVariables.Fs = np.round( np.interp(self.SeismicVariables.Ss,Ss_range, FS_table[self.SeismicVariables.soil]) , 3) 
             self.SeismicVariables.SDs = self.SeismicVariables.Ss * self.SeismicVariables.Fs
 
         # 1sec period
@@ -193,7 +193,7 @@ class SeismicTSC:
             self.SeismicVariables.F1 = F1_table[self.SeismicVariables.soil][-1]
             self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
         else:
-            self.SeismicVariables.F1 = round(np.interp(self.SeismicVariables.S1, S1_range, F1_table[self.SeismicVariables.soil]), 3)
+            self.SeismicVariables.F1 = np.round(np.interp(self.SeismicVariables.S1, S1_range, F1_table[self.SeismicVariables.soil]), 3)
             self.SeismicVariables.SD1 = self.SeismicVariables.S1 * self.SeismicVariables.F1
 
 

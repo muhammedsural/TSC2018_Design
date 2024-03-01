@@ -4,10 +4,14 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 - [x] Dikdörtgen kolonlarda sargı donatısı tasarımı.
 - [x] TBDY-2018 deprem yönetmeliğinde EK5-A da belirtilen sargılı ve sargısız mander beton modeli ile çelik modelinin oluşturulması.
 - [x] TBDY2018 bölüm 3'te verilen spektrum grafiklerinin çıkarılması.
-- [x] Verilen bilgilere göre BYS sınıfı ve yapılabilecek maximum bina yüksekliğinin bulunması
-- [ ] Deprem ivme kaydı okunması, spektral ivme,hız ve deplasman serilerinin çıkarılması.
-- [ ] Verilen bilgilere göre performans hedeflerinin bulunması
-- [ ] TBDY2018' e uygun R ve D katsayıları önermesi
+- [x] Verilen bilgilere göre BYS sınıfı ve yapılabilecek maximum bina yüksekliğinin bulunması.
+- [ ] Deprem kaydı seçimi, ivme kaydı okunması, spektral ivme,hız ve deplasman serilerinin çıkarılması ve ölçekleme işlemlerinin yapılması.
+- [ ] Verilen bilgilere göre performans hedeflerinin bulunması.
+- [ ] TBDY2018'e uygun R ve D katsayıları önermesi.
+- [ ] TBDY2018'e göre Eşdeğer deprem yüklerinin bulunması.
+- [ ] TBDY2018'e göre konsol istinatlarda kuvvetlerin bulunması.
+- [ ] TS500'e göre guse hesabı.
+
 
 # Repo ile ilgili özet bilgiler
 <p align="center">
