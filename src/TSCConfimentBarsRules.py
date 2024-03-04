@@ -41,8 +41,8 @@ class ConfimentDesign:
     def Set_Variables(self) -> None:
         self.Ac                  = self.GetAc(self.Height,self.Width)
         self.Ack                 = self.GetAck(self.Height,self.Width,self.Cover)
-        self.bkx                 = self.Get_bk(self.Width)
-        self.bky                 = self.Get_bk(self.Height)
+        self.bkx                 = self.Get_bk(self.Width,self.Cover)
+        self.bky                 = self.Get_bk(self.Height,self.Cover)
         self.ax                  = self.Get_a_i(self.bkx,self.Xkol)
         self.ay                  = self.Get_a_i(self.bky,self.Ykol)
         ConfRebarArea            = self.GetRebarArea(self.ConfimentRebarDiameter)
@@ -112,7 +112,7 @@ class ConfimentDesign:
         Ack = (Height - 2*Cover) * (Width - 2*Cover)
         return Ack
     
-    def Get_bk(self, Dimension : float) -> float:
+    def Get_bk(self, Dimension : float, Cover : float) -> float:
         """Çekirdek beton kenar uzunluğunu hesaplar
 
         Args:
@@ -122,10 +122,10 @@ class ConfimentDesign:
         Returns:
             float: Çekirdek beton kenar uzunluğu
         """
-        bk = Dimension - 2*self.Cover
+        bk = Dimension - 2*Cover
         return bk
     
-    def Get_a_i(self,bk : float, koladet : int):
+    def Get_a_i(self,bk : float, koladet : int) -> float:
         """Sargı donatıları arasındaki kol mesafesini hesaplar
 
         Args:
@@ -133,7 +133,7 @@ class ConfimentDesign:
             koladet (int): İlgili kenar doğrultusundaki sargı kol adeti
 
         Returns:
-            _type_: _description_
+            float: Sargi donatilari kollari arasindaki mesafe
         """
         return bk / koladet
 
