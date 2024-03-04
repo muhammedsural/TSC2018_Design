@@ -13,6 +13,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+packages = [
+    { include = "TSC2018_Design", from = "src" },
+]
+
 [project.urls]
 "Homepage" = "https://github.com/muhammedsural/TSC2018_Design"
 "Bug Tracker" = "https://github.com/muhammedsural/TSC2018_Design/issues"
