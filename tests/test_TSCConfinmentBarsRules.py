@@ -1,4 +1,5 @@
 from TSCConfimentBarsRules import ConfimentDesign
+import pytest
 
 """Units N,mm"""
 Nd                      = 16000 
@@ -25,4 +26,3 @@ Ln                      = 2600
 def setUpClass():
     Confinment = ConfimentDesign(Nd, fsy, Fctd, Ln, B, H, ClearCoverConc, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
     return Confinment
-
