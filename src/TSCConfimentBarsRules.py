@@ -18,28 +18,25 @@ class ConfimentDesign:
     ConfimentRebarDiameter  : float
     LongnitudeRebarDiameter : float
     
-    Ac                      : float = field(init=False)
-    Ack                     : float = field(init=False)
-    bkx                     : float = field(init=False)
-    bky                     : float = field(init=False)
-    ax                      : float = field(init=False)
-    ay                      : float = field(init=False)
-    Ashx                    : float = field(init=False)
-    Ashy                    : float = field(init=False)
-    Ash                     : float = field(init=False)
-    Lb                      : float = field(init=False)
-    EndConfLength           : float = field(init=False)
-    MidConfLength           : float = field(init=False)
-    OtherConfLength         : float = field(init=False)
-    s_EndConfAreaMax        : float = field(init=False)
-    s_MiddleConfAreaMax     : float = field(init=False)
-    s_OtherConfAreaMax      : float = field(init=False)
-    s_OptEndConfArea        : float = field(init=False)
-    s_OptMiddleConfArea     : float = field(init=False)
-    
+    Ac                      : float = field(init=False,repr=False)
+    Ack                     : float = field(init=False,repr=False)
+    bkx                     : float = field(init=False,repr=False)
+    bky                     : float = field(init=False,repr=False)
+    ax                      : float = field(init=False,repr=False)
+    ay                      : float = field(init=False,repr=False)
+    Ashx                    : float = field(init=False,repr=False)
+    Ashy                    : float = field(init=False,repr=False)
+    Ash                     : float = field(init=False,repr=False)
+    Lb                      : float = field(init=False,repr=False)
+    EndConfLength           : float = field(init=False,repr=False)
+    MidConfLength           : float = field(init=False,repr=False)
+    OtherConfLength         : float = field(init=False,repr=False)
+    s_EndConfAreaMax        : float = field(init=False,repr=False)
+    s_MiddleConfAreaMax     : float = field(init=False,repr=False)
+    s_OtherConfAreaMax      : float = field(init=False,repr=False)
+    s_OptEndConfArea        : float = field(init=False,repr=False)
+    s_OptMiddleConfArea     : float = field(init=False,repr=False)
 
-    def __post_init__(self):
-        self.Set_Variables()
         
     def Set_Variables(self) -> None:
         self.Ac                  = self.GetAc(self.Height,self.Width)
