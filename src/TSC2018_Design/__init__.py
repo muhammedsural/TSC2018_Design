@@ -1,1 +1,0 @@
-from src.TSCConfimentBarsRules import ConfimentDesign
