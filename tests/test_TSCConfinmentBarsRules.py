@@ -24,6 +24,5 @@ Ln                      = 2600
 @pytest.fixture(scope="class")
 def setUpClass():
     Confinment = ConfimentDesign(Nd, fsy, Fctd, Ln, B, H, ClearCoverConc, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
-    retur Confinment
+    return Confinment
 
-def 
