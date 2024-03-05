@@ -1,33 +1,8 @@
-<<<<<<< HEAD
-import pandas as pd
-from dataclasses import dataclass,field,asdict
-from TSCResponseSpectra import SeismicResistanceBuildingInputs,SeismicTSC
-=======
 # import pandas as pd
 # from dataclasses import dataclass,field,asdict
->>>>>>> b83c2c7561eead55db774fae1ac9ba4b81b60f1b
 
-# #TODO bu bölümdeki geliştirmeler devam etmektedir.
+#TODO bu bölümdeki geliştirmeler devam etmektedir.
 
-<<<<<<< HEAD
-@dataclass
-class EquivalentLateralLoad:
-    """Eşdeğer deprem yükünün hesabi 
-    Args
-        Floors           : Katlarla alakali bilgilerin tutuldugu DataFrame [Kat,Kat kütlesi,Kat yüksekliği]
-        Tpx              : X yönündeki doğal titresim periyodu
-        Tpy              : Y yönündeki doğal titresim periyodu
-        TSCSeismic       : Sismik verilerin ve fonksiyonlarin bulunduğu sinif
-        VarStruc         : Binaya ait sismik bilgilerin tutulduğu sinif
-    """
-    Floors       : pd.DataFrame 
-    Tpx          : float
-    Tpy          : float
-    TSCSeismic   : SeismicTSC = field(default_factory=SeismicTSC)
-    VarStruc     : SeismicResistanceBuildingInputs = field(default_factory=SeismicResistanceBuildingInputs)
-    Vte_x        : float = field(default=0.0)
-    Vte_y        : float = field(default=0.0)
-=======
 # @dataclass
 # class SeismicInput:
 #     """
@@ -60,7 +35,6 @@ class EquivalentLateralLoad:
 #     Var_Seismic  : SeismicInput = field(default_factory=SeismicInput)
 #     Vte_x        : float = 0.0
 #     Vte_y        : float = 0.0
->>>>>>> b83c2c7561eead55db774fae1ac9ba4b81b60f1b
 
 #     def __post_init__(self) -> None:
 #         self.calc_Total_Force()
@@ -68,19 +42,6 @@ class EquivalentLateralLoad:
 #     def __repr__(self) -> str:
 #         return super().__repr__()
     
-<<<<<<< HEAD
-    # Fonksiyon hazır
-    def get_Total_Mass(self) -> float:
-        """Kat kütlelerinden toplam kütlenin hesabi"""
-        return self.Floors["Masses"].sum() #BUG Burada static bir isim kullanmaksa sütun no kullanmak sonraki hataları engeller.
-    
-    # Fonksiyon hazır
-    def calc_Total_Force(self):
-       """Eşdeğer deprem yükü yöntemine göre taban kesme kuvveti hesabi"""
-       SaR_Tpx = self.TSCSeismic.Get_SaR(T = self.Tpx)
-       SaR_Tpy = self.TSCSeismic.Get_SaR(T = self.Tpy)
-       print(f"SaR(Tpx) = {SaR_Tpx}; SaR(Tpy) = {SaR_Tpy} ")
-=======
 #     # Fonksiyon hazır
 #     def get_Total_Mass(self) -> float:
 #         """Kat kütlelerinden toplam kütlenin hesabi"""
@@ -92,7 +53,6 @@ class EquivalentLateralLoad:
 #        SaR_Tpx = self.Var_Seismic.Get_SaR(T = self.Tpx)
 #        SaR_Tpy = self.Var_Seismic.Get_SaR(T = self.Tpy)
 #        print(f"SaR(Tpx) = {SaR_Tpx}; SaR(Tpy) = {SaR_Tpy} ")
->>>>>>> b83c2c7561eead55db774fae1ac9ba4b81b60f1b
 
 #        self.Vte_x = round((self.Floors["Masses"].sum() * SaR_Tpx * 9.81),2)
 #        self.Vte_y = round((self.Floors["Masses"].sum() * SaR_Tpy * 9.81),2)
