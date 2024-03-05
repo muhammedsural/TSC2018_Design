@@ -2,9 +2,77 @@ import pandas as pd
 from dataclasses import dataclass,field,asdict
 import numpy as np 
 import scipy as sc
-from Enums import DuctilityLevel,ResSystemType,SlabSystem,SeismicDesignClass
+from Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
 
 # TODO Sınıfı refactor etmek için bozduk şuanda buglar olabilir düzeltilmeli.
+# Spectral values
+Ss_range = [0.25 , 0.50 , 0.75, 1.00 , 1.25 , 1.50 ]
+FS_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
+            "ZB": [0.9 , 0.9 , 0.9 , 0.9 , 0.9 , 0.9], 
+            "ZC": [1.3 , 1.3 , 1.2 , 1.2 , 1.2 , 1.2],
+            "ZD": [1.6 , 1.4 , 1.2 , 1.1 , 1.0 , 1.0],
+            "ZE": [2.4 , 1.7 , 1.3 , 1.1 , 0.9 , 0.8]}
+S1_range = [0.10 , 0.20 , 0.30, 0.40 , 0.50 , 0.60 ]
+F1_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
+            "ZB": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
+            "ZC": [1.5 , 1.5 , 1.5 , 1.5 , 1.5 , 1.4],
+            "ZD": [2.4 , 2.2 , 2.0 , 1.9 , 1.8 , 1.7],
+            "ZE": [4.2 , 3.3 , 2.8 , 2.4 , 2.2 , 2.0]}
+
+TABLE41 = pd.DataFrame({
+    1  : [8, 3  , 3],
+    2  : [7, 2.5, 2],
+    3  : [6, 2.5, 2],
+    5  : [8, 2.5, 2],
+    6  : [7, 2.5, 2],
+    7  : [3, 2  , 0],
+
+    9  : [6, 2.5, 4],
+    8  : [5, 2.5, 4],
+    10 : [6, 2.5, 6],
+    11 : [5, 2.5, 6],
+
+    12 : [4, 2.5, 7],
+    13 : [4, 2  , 6],
+    14 : [4, 2  , 6],
+    # TODO Prefabrik yapılar için R katsayıları bağlantı tipine göre ikili halde verilmiş. Problem şimdilik 1
+    15 : [1,1,1],
+    16 : [1,1,1],
+    17 : [1,1,1],
+    18 : [1,1,1],
+    19 : [1,1,1],
+    20 : [1,1,1],
+    21 : [1,1,1],
+    22 : [1,1,1],
+    23 : [1,1,1],
+    24 : [1,1,1],
+
+    25 : [8, 3  , 3],
+    26 : [8, 2.5, 2],
+    27 : [5, 2  , 4],
+    28 : [8, 3  , 2],
+    29 : [6, 2.5, 2],
+    30 : [4, 2  , 0],
+
+    31 : [6, 2.5, 4],
+    32 : [5, 2  , 4],
+
+    33 : [4, 2.5, 7],
+    34 : [3, 2  , 8],
+    35 : [4, 2  , 7],
+
+    36 : [4,2,8],
+    37 : [3,2,8],
+
+    38 : [4,2,7],
+    39 : [4,2,7],
+    40 : [3,2,8],
+    41 : [2.5,1.5,8],
+
+    42 : [4,2,7],
+    43 : [3,2,8]
+}).T
+TABLE41.columns = ["R", "D", "BYS"]
 
 @dataclass
 class SeismicInputs:
@@ -15,19 +83,6 @@ class SeismicInputs:
         soil      : soil class
         intensity : intensity level 
                         options: DD1, DD2, DD3, DD4
-        Ss        : Kisa periyot harita katsayisi
-        S1        : 1 sn periyot harita katsayisi
-        soil      : Zemin sinifi
-        TL        : Spektrum hesabindaki en uç periyot
-        PGA       : Peak ground acceleration
-        PGV       : Peak ground acceleration
-        Fs        : Kisa periyot harita spektral ivme katsayisi [boyutsuz]
-        F1        : 1.0 saniye için harita spektral ivme katsayisi [boyutsuz]
-        SDs       : Kisa periyot tasarim spektral ivme katsayisi [boyutsuz]
-        SD1       : 1.0 saniye periyot için tasarim spektral ivme katsayisi [boyutsuz]
-        TA        : Corner period in spectrum (Kose periyod)
-        TB        : Corner period in spectrum (Kose periyod)
-        TL        : Long period (Uzun periyod)
         
     """
 
@@ -38,7 +93,7 @@ class SeismicInputs:
     
 
     def __repr__(self) -> str:
-        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}\nSs :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1 }\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
+        return f"Latitude :{self.lat}\nLongitude :{self.lon}\nSoil Class :{self.soil}\nIntensity:{self.intensity}"
 
     def dict(self) -> dict:
         """Class property lerini sözlük olarak döndürür.
@@ -63,27 +118,27 @@ class SeismicInputs:
 class SeismicResistanceBuildingInputs:
     """
     Args:
-        Hn        : Bina serbest yüksekliği [m]
-        R         : Yapi davranis katsayisi
-        D         : Overstrength factor (Dayanim fazlalagi katsayisi)
-        I         : Building important factor (Bina onem katsayisi)
-        DTS       : Deprem tasarim sinifi 
-        BYS       : Bina yükseklik sinifi
+        Hn              : Bina serbest yüksekliği [m]
+        R               : Yapi davranis katsayisi
+        D               : Overstrength factor (Dayanim fazlalagi katsayisi)
+        I               : Building important factor (Bina onem katsayisi)
+        DTS             : Deprem tasarim sinifi 
+        BYS             : Bina yükseklik sinifi
         DuctilityLevel  : Yapinin suneklilik duzeyi.
-        ResSystemType   :
-        SlabSystem      :
-        M_DEV           :
-        M_o             :
+        ResSystemType_X : X doğrultusunda depreme dayanacak tasiyici sistem tipi
+        ResSystemType_Y : Y doğrultusunda depreme dayanacak tasiyici sistem tipi
+        SlabSystem      : Doseme sistemi
     """
     Hn              : float
     I               : float  
     DuctilLevel     : DuctilityLevel 
-    ResSystemType   : ResSystemType  
+    ResSystemType_X : ResSystemType  
+    ResSystemType_Y : ResSystemType  
     SlabSystem      : SlabSystem   
 
 
     def __repr__(self) -> str:
-        return f"Hn :{self.Hn}\nRx :{self.Rx}\nRy :{self.Ry}\nDx :{self.Dx}\nDy :{self.Dy}\nI :{self.I}\nDTS :{self.DTS}\nBYS :{self.BYS}"
+        return f"Hn :{self.Hn}\nI :{self.I}\nDuctilLevel :{self.DuctilLevel.name}\nResSystemType_X :{self.ResSystemType_X.name}\nResSystemType_Y :{self.ResSystemType_Y.name}\nSlabSystem :{self.SlabSystem.name}"
 
     def dict(self) -> dict:
         """Class property lerini sözlük olarak döndürür.
@@ -107,6 +162,22 @@ class SeismicResistanceBuildingInputs:
 
 @dataclass
 class SeismicInputsManager:
+    """
+        SeismicVariables : Harita bilgileri
+        Ss        : Kisa periyot harita katsayisi
+        S1        : 1 sn periyot harita katsayisi
+        soil      : Zemin sinifi
+        TL        : Spektrum hesabindaki en uç periyot
+        PGA       : Peak ground acceleration
+        PGV       : Peak ground acceleration
+        Fs        : Kisa periyot harita spektral ivme katsayisi [boyutsuz]
+        F1        : 1.0 saniye için harita spektral ivme katsayisi [boyutsuz]
+        SDs       : Kisa periyot tasarim spektral ivme katsayisi [boyutsuz]
+        SD1       : 1.0 saniye periyot için tasarim spektral ivme katsayisi [boyutsuz]
+        TA        : Corner period in spectrum (Kose periyod)
+        TB        : Corner period in spectrum (Kose periyod)
+        TL        : Long period (Uzun periyod)
+    """
     SeismicVariables : SeismicInputs = field(default_factory=SeismicInputs)
     Ss        : float  = field(init=False)
     S1        : float  = field(init=False)
@@ -123,12 +194,18 @@ class SeismicInputsManager:
     def __post_init__(self) -> None:
         self.SetVariables()
     
+    def __repr__(self) -> str:
+        return f"Ss :{self.Ss}\nS1 :{self.S1}\nPGA :{self.PGA}\nPGV :{self.PGV}\nFs :{self.Fs}\nF1 :{self.F1}\nSDs :{self.SDs}\nSD1 :{self.SD1}\nTA :{self.TA}\nTB :{self.TB}\nTL :{self.TL}"
+    
     def SetVariables(self) ->None:
         """Hesaplanmasi gereken değerleri hesaplar ve set eder."""
-        self.__GetSpectralMapVariables()
-        self.__Get_SpectrumCoefficients()
-        self.__Get_TA()
-        self.__Get_TB()
+        spec_val = self.GetSpectralMapVariables(self.SeismicVariables.intensity, self.SeismicVariables.lat, self.SeismicVariables.lon)
+        self.Fs  = self.Get_Fs(Ss=self.Ss, Soil=self.SeismicVariables.soil)
+        self.SDs = self.GetShortPeriodCoefficient(Fs=self.Fs, Ss=self.Ss)
+        self.F1  = self.Get_F1(S1=self.S1, Soil=self.SeismicVariables.soil)
+        self.SD1 = self.GetOneSecondsPeriodCoefficient(S1=self.S1, F1=self.F1)
+        self.TA = self.Get_TA(SD1=self.SD1, SDs=self.SDs)
+        self.TB = self.Get_TB(SD1=self.SD1, SDs=self.SDs)
  
     def GetSpectralMapVariables(self,Intensity : str, Latitude : float, Longitude : float) -> dict:
         """Spektrum haritasinda verilen koordinatlara göre spektral harita değerlerini bulur"""
@@ -156,37 +233,22 @@ class SeismicInputsManager:
 
         return spectral_value_dict
 
-    def __Get_SpectrumCoefficients(self, Ss : float, S1 : float, Soil : str)->None:
-        # Spectral values
-        Ss_range = [0.25 , 0.50 , 0.75, 1.00 , 1.25 , 1.50 ]
-
-        FS_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
-                    "ZB": [0.9 , 0.9 , 0.9 , 0.9 , 0.9 , 0.9], 
-                    "ZC": [1.3 , 1.3 , 1.2 , 1.2 , 1.2 , 1.2],
-                    "ZD": [1.6 , 1.4 , 1.2 , 1.1 , 1.0 , 1.0],
-                    "ZE": [2.4 , 1.7 , 1.3 , 1.1 , 0.9 , 0.8]}
-
-        S1_range = [0.10 , 0.20 , 0.30, 0.40 , 0.50 , 0.60 ]
-
-        F1_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
-                    "ZB": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
-                    "ZC": [1.5 , 1.5 , 1.5 , 1.5 , 1.5 , 1.4],
-                    "ZD": [2.4 , 2.2 , 2.0 , 1.9 , 1.8 , 1.7],
-                    "ZE": [4.2 , 3.3 , 2.8 , 2.4 , 2.2 , 2.0]}
-
-        
-
+    def Get_Fs(self,Ss : float,Soil : str)-> float:
         # Short period
         if Ss < Ss_range[0]:
             Fs = FS_table[Soil][0]
-            SDs = Ss * Fs
         elif Ss > Ss_range[-1]:
             Fs = FS_table[Soil][-1]
-            SDs = Ss * Fs    
         else:
-            Fs = np.round( np.interp(Ss,Ss_range, FS_table[Soil]) , 3) 
-            SDs = Ss * Fs
+            Fs = np.round( np.interp(Ss,Ss_range, FS_table[Soil]) , 3)
+        return Fs
+    
+    def GetShortPeriodCoefficient(self,Fs : float, Ss : float)-> float:
+        # Short period
+        SDs = Ss * Fs
+        return SDs
 
+    def Get_F1(self,S1 : float,Soil : str)-> float:
         # 1sec period
         if S1 < S1_range[0] :
             F1 = F1_table[Soil][0]
@@ -196,67 +258,74 @@ class SeismicInputsManager:
             SD1 = S1 * F1
         else:
             F1 = np.round(np.interp(S1, S1_range, F1_table[Soil]), 3)
-            SD1 = S1 * F1
+        return F1
 
-
-        del Ss_range,FS_table,S1_range,F1_table
+    def GetOneSecondsPeriodCoefficient(self, S1 : float, F1 : float):
+        # 1sec period
+        SD1 = S1 * F1
+        return SD1
    
-    def __Get_TA(self) -> float:
+    def Get_TA(self, SD1 : float, SDs : float) -> float:
         """Yatay elastik tasarim spektrum sol köşe periyodu."""
-        self.SeismicVariables.TA = 0.2 * self.SeismicVariables.SD1 / self.SeismicVariables.SDs
-
-    def __Get_TB(self) -> float:
+        TA = 0.2 * SD1 / SDs
+        return TA
+    
+    def Get_TB(self, SD1 : float, SDs : float) -> float:
         """Yatay elastik tasarim elastik spektrum sağ köşe periyodu"""
-        self.SeismicVariables.TB = self.SeismicVariables.SD1 / self.SeismicVariables.SDs
+        return SD1 / SDs
+        
 
 
 @dataclass
 class SeismicResistanceBuildingManeger:
     BuildingVariables : SeismicResistanceBuildingInputs = field(default_factory=SeismicResistanceBuildingInputs)
-    SeismicVariables  : SeismicInputsManager = field(default_factory=SeismicInputsManager)
-    M_DEV           : float  = field(default=0)
-    M_o             : float  = field(default=0)
-    DTS             : SeismicDesignClass = field(init=False)
-    BYS             : int    = field(init=False)
-    Rx              : float  = field(init=False)
-    Ry              : float  = field(init=False)
-    Dx              : float  = field(init=False)
-    Dy              : float  = field(init=False)
+    SeismicManager    : SeismicInputsManager = field(default_factory=SeismicInputsManager)
+    BuildingClass     : SeismicResistanceBuildingsClass = field(default_factory=SeismicResistanceBuildingsClass)
+    Total_M_DEV       : float  = field(default=0)
+    Total_M_o         : float  = field(default=0)
+    DTS               : SeismicDesignClass = field(init=False)
+    BYS               : int    = field(init=False)
+    Rx                : float  = field(init=False)
+    Ry                : float  = field(init=False)
+    Dx                : float  = field(init=False)
+    Dy                : float  = field(init=False)
     
     
-    def __GetDTS(self) -> None:
+    def GetDTS(self, SDs : float, I : float) -> None:
         """Deprem tasarim sinifini bulur."""
-        if self.SeismicVariables.SDs < .33 : 
-            self.DTS = SeismicDesignClass.four_a.value
+        if SDs < .33 : 
+            DTS = SeismicDesignClass.four_a.value
 
-            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
-                self.DTS = SeismicDesignClass.four.value
+            if I ==2 or I == 3:
+                DTS = SeismicDesignClass.four.value
                 
-        if self.SeismicVariables.SDs >= 0.33 and self.SeismicVariables.SDs < 0.50 : 
-            self.DTS = SeismicDesignClass.three_a.value
+        if SDs >= 0.33 and SDs < 0.50 : 
+            DTS = SeismicDesignClass.three_a.value
 
-            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
-                self.DTS = SeismicDesignClass.three.value
+            if I ==2 or I == 3:
+                DTS = SeismicDesignClass.three.value
                 
-        if self.SeismicVariables.SDs >= 0.50 and self.SeismicVariables.SDs < 0.75 :
-            self.DTS = SeismicDesignClass.two_a.value
+        if SDs >= 0.50 and SDs < 0.75 :
+            DTS = SeismicDesignClass.two_a.value
 
-            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
-                self.DTS = SeismicDesignClass.two.value
+            if I ==2 or I == 3:
+                DTS = SeismicDesignClass.two.value
 
-        if self.SeismicVariables.SDs >= 0.75 : 
-            self.DTS = SeismicDesignClass.one_a.value
+        if SDs >= 0.75 : 
+            DTS = SeismicDesignClass.one_a.value
 
-            if self.BuildingVariables.I ==2 or self.BuildingVariables.I == 3:
-                self.DTS = SeismicDesignClass.one.value
+            if I ==2 or I == 3:
+                DTS = SeismicDesignClass.one.value
+
+        return DTS
     
-    def __GetMaxBYS(self): 
+    def GetMaxBYS(self, DTS : int, Hn : float) -> int: 
         """TBDY2018 Tablo 3.3 e göre BYS sinifini bulur."""
-        if self.DTS in [1,2,3,4]:
+        if DTS in [1,2,3,4]:
             dts = 0
-        if self.DTS in [5,6]:
+        if DTS in [5,6]:
             dts = 1
-        if self.DTS in [7,8]:
+        if DTS in [7,8]:
             dts = 1
         
         BYS = {
@@ -270,10 +339,62 @@ class SeismicResistanceBuildingManeger:
             8 : [0,0,0]
         }
         df_bys = pd.DataFrame(BYS).T
-        self.BYS = df_bys[dts][df_bys[dts] < self.BuildingVariables.Hn].index[0]
-        del BYS,dts,df_bys
+        BYS = df_bys[dts][df_bys[dts] < Hn].index[0]
+        return BYS
 
-    def Get_SeismicResistanceSystemClasifications(self):
+    def Check_4_3_1_2(self, DTS : int, BuildingClass : int, BYS : int)-> bool:
+        """
+        TBDY-4.3.1.2 : Tablo 4.1’de A21, A22 ve C21, C22 ile simgelenen taşıyıcı sistemlerde, sadece DTS = 4 olan binalar ile sınırlı olmak üzere, izin verilen Bina Yükseklik Sınıfı BYS ≥ 2’ye yükseltilebilir.
+
+        Args:
+            DTS (int): _description_
+            BuildingClass (int): _description_
+            BYS (int): _description_
+
+        Returns:
+            bool: _description_
+        """
+        result = True
+        if BuildingClass in [SeismicResistanceBuildingsClass.A21.value,SeismicResistanceBuildingsClass.A22.value,SeismicResistanceBuildingsClass.C21.value,SeismicResistanceBuildingsClass.C22.value]:
+            if DTS != 4 and BYS < 2:
+                result = False
+            else:
+                if BYS < 2 :
+                    result = False
+        
+        return result
+
+    def Check_4_3_4_1a(self, DTS : int, DuctilityType : int)-> bool:
+        """
+        TBDY-4.3.4.1a : DTS=1a, DTS=2a, DTS=3a ve DTS=4a olarak sınıflandırılan binalarda süneklik düzeyi sınırlı taşıyıcı sistemler kullanılamaz.
+
+        Args:
+            DTS (int): _description_
+            DuctilityType (int): _description_
+
+        Returns:
+            bool: _description_
+        """
+        result = True
+        if DTS in [SeismicDesignClass.one_a.value, SeismicDesignClass.two_a.value, SeismicDesignClass.three_a.value, SeismicDesignClass.four_a.value] and DuctilityType == DuctilityLevel.Sinirli.value:
+            result = False
+        
+        return result
+
+    def Check_4_3_4_1b(self, DTS : int, DuctilityType : int, BYS : int)-> bool:
+        """
+        TBDY-4.3.4.1b : BYS ≤ 6 olan ve DTS=1a ve DTS=2a olarak sınıflandırılan binalarda süneklik düzeyi karma taşıyıcı sistemler kullanılamaz.
+
+        Args:
+            DTS (int): _description_
+            DuctilityType (int): _description_
+            BYS (int): _description_
+
+        Returns:
+            bool: _description_
+        """
+
+    def Get_SeismicResistanceSystemClasifications(self, Ductility : int, ResistanceSystem : int, SlabSystem : int):
         pass
 
 
@@ -842,24 +963,39 @@ class TimeSeriesSpectra:
 
 def main() ->None:
     SeismicVariables = SeismicInputs(lat = 39.85,lon = 30.2,soil = "ZC",intensity = "DD2")
-
-    StructureVariables = SeismicResistanceBuildingInputs(Hn  = 70, 
-                                                         Rx   = 8.0, 
-                                                         Ry   = 8.0, 
-                                                         Dx   = 3.0, 
-                                                         Dy   = 3.0, 
-                                                         I   = 1.0, 
-                                                         DTS = SeismicDesignClass.one, 
-                                                         BYS = 1,
-                                                         DuctilLevel = DuctilityLevel.Yuksek,
-                                                         ResSystemType = ResSystemType.BACerceve,
-                                                         SlabSystem = SlabSystem.Plak_kirisli)
-
-    rs = SeismicTSC(SeismicVariables = SeismicVariables,BuildingVariables = StructureVariables)
-
+    print("="*80)
     print(SeismicVariables)
-    print(StructureVariables)
-    print(rs.ElasticSpectrums)
+
+    RCBuilding = SeismicResistanceBuildingInputs(Hn=70,
+                                                 I=1,
+                                                 DuctilLevel=DuctilityLevel.Yuksek,
+                                                 ResSystemType_X=ResSystemType.BAKarma,
+                                                 ResSystemType_Y=ResSystemType.BAKarma,
+                                                 SlabSystem=SlabSystem.Plak_kirisli)
+    print("="*80)
+    print(RCBuilding)
+
+    SIM = SeismicInputsManager(SeismicVariables=SeismicVariables, TL=6.0)
+    print("="*80)
+    print(SIM)
+
+    # StructureVariables = SeismicResistanceBuildingInputs(Hn  = 70, 
+    #                                                      Rx   = 8.0, 
+    #                                                      Ry   = 8.0, 
+    #                                                      Dx   = 3.0, 
+    #                                                      Dy   = 3.0, 
+    #                                                      I   = 1.0, 
+    #                                                      DTS = SeismicDesignClass.one, 
+    #                                                      BYS = 1,
+    #                                                      DuctilLevel = DuctilityLevel.Yuksek,
+    #                                                      ResSystemType = ResSystemType.BACerceve,
+    #                                                      SlabSystem = SlabSystem.Plak_kirisli)
+
+    # rs = SeismicTSC(SeismicVariables = SeismicVariables,BuildingVariables = StructureVariables)
+
+    
+    # print(StructureVariables)
+    # print(rs.ElasticSpectrums)
     
     
 if __name__ == "__main__":

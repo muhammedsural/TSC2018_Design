@@ -38,11 +38,11 @@ class SeismicResistanceBuildingsClass(Enum):
     D1  = 36
     D2  = 37
     E11 = 38
-    E12 = 38
-    E21 = 38
-    E22 = 38
-    F1  = 38
-    F2  = 38
+    E12 = 39
+    E21 = 40
+    E22 = 41
+    F1  = 42
+    F2  = 43
 
 
 class SeismicDesignClass(Enum):
