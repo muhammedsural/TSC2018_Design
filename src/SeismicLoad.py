@@ -1,40 +1,26 @@
 import pandas as pd
 from dataclasses import dataclass,field,asdict
+from TSCResponseSpectra import SeismicResistanceBuildingInputs,SeismicTSC
 
 #TODO bu bölümdeki geliştirmeler devam etmektedir.
-
-@dataclass
-class SeismicInput:
-    """
-    TL   : Spektrum hesabindaki en uç periyot
-    R    : Yapi davranis katsayisi
-    I    : Bina onem katsayisi
-    D    : Dayanim fazlalagi katsayisi
-    SDs  : Kisa periyot tasarim spektral ivme katsayisi [boyutsuz]
-    Sd1  : 1.0 saniye periyot için tasarim spektral ivme katsayisi [boyutsuz]
-    """
-    SDs  : float= field(default_factory=float)
-    SD1  : float= field(default_factory=float)
-    TL   : float= field(default_factory=float)
-    R    : float= field(default_factory=float)
-    I    : float= field(default_factory=float)
-    D    : float= field(default_factory=float)
 
 @dataclass
 class EquivalentLateralLoad:
     """Eşdeğer deprem yükünün hesabi 
     Args
-        Floors           : Katlarla alakalı bilgilerin tutuldugu DataFrame [Kat,Kat kütlesi,Kat yüksekliği] kütlelerinin tutuldugu DataFrame
+        Floors           : Katlarla alakali bilgilerin tutuldugu DataFrame [Kat,Kat kütlesi,Kat yüksekliği]
         Tpx              : X yönündeki doğal titresim periyodu
         Tpy              : Y yönündeki doğal titresim periyodu
-        SeismicVariables : Sismik verilerin bulunduğu sinif
+        TSCSeismic       : Sismik verilerin ve fonksiyonlarin bulunduğu sinif
+        VarStruc         : Binaya ait sismik bilgilerin tutulduğu sinif
     """
     Floors       : pd.DataFrame 
     Tpx          : float
     Tpy          : float
-    Var_Seismic  : Seismic = field(default_factory=Seismic)
-    Vte_x        : float = 0.0
-    Vte_y        : float = 0.0
+    TSCSeismic   : SeismicTSC = field(default_factory=SeismicTSC)
+    VarStruc     : SeismicResistanceBuildingInputs = field(default_factory=SeismicResistanceBuildingInputs)
+    Vte_x        : float = field(default=0.0)
+    Vte_y        : float = field(default=0.0)
 
     def __post_init__(self) -> None:
         self.calc_Total_Force()
@@ -45,13 +31,13 @@ class EquivalentLateralLoad:
     # Fonksiyon hazır
     def get_Total_Mass(self) -> float:
         """Kat kütlelerinden toplam kütlenin hesabi"""
-        return self.Floors["Masses"].sum()
+        return self.Floors["Masses"].sum() #BUG Burada static bir isim kullanmaksa sütun no kullanmak sonraki hataları engeller.
     
     # Fonksiyon hazır
     def calc_Total_Force(self):
        """Eşdeğer deprem yükü yöntemine göre taban kesme kuvveti hesabi"""
-       SaR_Tpx = self.Var_Seismic.Get_SaR(T = self.Tpx)
-       SaR_Tpy = self.Var_Seismic.Get_SaR(T = self.Tpy)
+       SaR_Tpx = self.TSCSeismic.Get_SaR(T = self.Tpx)
+       SaR_Tpy = self.TSCSeismic.Get_SaR(T = self.Tpy)
        print(f"SaR(Tpx) = {SaR_Tpx}; SaR(Tpy) = {SaR_Tpy} ")
 
        self.Vte_x = round((self.Floors["Masses"].sum() * SaR_Tpx * 9.81),2)
