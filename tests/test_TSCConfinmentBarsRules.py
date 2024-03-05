@@ -1,4 +1,4 @@
-from TSCConfimentBarsRules import ConfimentDesign
+from src.TSCConfimentBarsRules import ConfimentDesign
 import pytest
 import math
 
