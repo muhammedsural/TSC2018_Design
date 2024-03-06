@@ -1,10 +1,18 @@
+from Decorators import log_decorator, performance_decorator, timer
 import pandas as pd
 from dataclasses import dataclass,field,asdict
 import numpy as np 
 import scipy as sc
 from Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
 
-# TODO Sınıfı refactor etmek için bozduk şuanda buglar olabilir düzeltilmeli.
+__all__ = ['SeismicInputs',
+           'SeismicResistanceBuildingInputs',
+           'SeismicInputsManager',
+           'SeismicResistanceBuildingManeger',
+           'Spectrum',
+           'SeismicTSC',
+           'TimeSeriesSpectra']
+
 # Spectral values
 Ss_range = [0.25 , 0.50 , 0.75, 1.00 , 1.25 , 1.50 ]
 FS_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8], 
@@ -73,6 +81,9 @@ TABLE41 = pd.DataFrame({
     43 : [3,2,8]
 }).T
 TABLE41.columns = ["R", "D", "BYS"]
+
+
+
 
 @dataclass
 class SeismicInputs:
@@ -206,7 +217,8 @@ class SeismicInputsManager:
         self.SD1 = self.GetOneSecondsPeriodCoefficient(S1=self.S1, F1=self.F1)
         self.TA = self.Get_TA(SD1=self.SD1, SDs=self.SDs)
         self.TB = self.Get_TB(SD1=self.SD1, SDs=self.SDs)
- 
+    
+    
     def GetSpectralMapVariables(self,Intensity : str, Latitude : float, Longitude : float) -> dict:
         """Spektrum haritasinda verilen koordinatlara göre spektral harita değerlerini bulur"""
         afad_spectra_params_df = pd.read_csv("src\\Resource\\AFAD_TDTH_parametre.csv")   
@@ -232,7 +244,7 @@ class SeismicInputsManager:
         self.PGV = spectral_value_dict["PGV"]
 
         return spectral_value_dict
-
+    
     def Get_Fs(self,Ss : float,Soil : str)-> float:
         # Short period
         if Ss < Ss_range[0]:
@@ -247,7 +259,7 @@ class SeismicInputsManager:
         # Short period
         SDs = Ss * Fs
         return SDs
-
+    
     def Get_F1(self,S1 : float,Soil : str)-> float:
         # 1sec period
         if S1 < S1_range[0] :
@@ -259,12 +271,12 @@ class SeismicInputsManager:
         else:
             F1 = np.round(np.interp(S1, S1_range, F1_table[Soil]), 3)
         return F1
-
+    
     def GetOneSecondsPeriodCoefficient(self, S1 : float, F1 : float):
         # 1sec period
         SD1 = S1 * F1
         return SD1
-   
+    
     def Get_TA(self, SD1 : float, SDs : float) -> float:
         """Yatay elastik tasarim spektrum sol köşe periyodu."""
         TA = 0.2 * SD1 / SDs
@@ -278,19 +290,36 @@ class SeismicInputsManager:
 
 @dataclass
 class SeismicResistanceBuildingManeger:
+    """
+    BuildingVariables type(SeismicResistanceBuildingInputs) :
+    SeismicManager    type(SeismicInputsManager) :
+    BuildingClass     type(SeismicResistanceBuildingsClass) :
+    Total_M_DEV       type(float             ) : default=0
+    Total_M_o         type(float             ) : default=0
+    DTS               type(SeismicDesignClass) : default=0
+    BYS               type(int               ) : default=0
+    Rx                type(float             ) : default=1
+    Ry                type(float             ) : default=1
+    Dx                type(float             ) : default=1
+    Dy                type(float             ) : default=1
+
+    """
     BuildingVariables : SeismicResistanceBuildingInputs = field(default_factory=SeismicResistanceBuildingInputs)
-    SeismicManager    : SeismicInputsManager = field(default_factory=SeismicInputsManager)
+    SeismicManager    : SeismicInputsManager            = field(default_factory=SeismicInputsManager)
     BuildingClass     : SeismicResistanceBuildingsClass = field(default_factory=SeismicResistanceBuildingsClass)
-    Total_M_DEV       : float  = field(default=0)
-    Total_M_o         : float  = field(default=0)
-    DTS               : SeismicDesignClass = field(init=False)
-    BYS               : int    = field(init=False)
-    Rx                : float  = field(init=False)
-    Ry                : float  = field(init=False)
-    Dx                : float  = field(init=False)
-    Dy                : float  = field(init=False)
+    Total_M_DEV       : float               = field(default=0)
+    Total_M_o         : float               = field(default=0)
+    DTS               : SeismicDesignClass  = field(default=0)
+    BYS               : int                 = field(default=0.)
+    Rx                : float               = field(default=1.)
+    Ry                : float               = field(default=1.)
+    Dx                : float               = field(default=1.)
+    Dy                : float               = field(default=1.)
     
-    
+    def SetVariables(self)->None:
+        self.DTS = self.GetDTS(self.SeismicManager.SDs, self.BuildingVariables.I)
+        self.BYS = self.GetMaxBYS(self.DTS, self.BuildingVariables.Hn)
+
     def GetDTS(self, SDs : float, I : float) -> None:
         """Deprem tasarim sinifini bulur."""
         if SDs < .33 : 
@@ -326,7 +355,7 @@ class SeismicResistanceBuildingManeger:
         if DTS in [5,6]:
             dts = 1
         if DTS in [7,8]:
-            dts = 1
+            dts = 2
         
         BYS = {
             1 : [70.1,91.1,105.1],
@@ -339,6 +368,7 @@ class SeismicResistanceBuildingManeger:
             8 : [0,0,0]
         }
         df_bys = pd.DataFrame(BYS).T
+        # BYS DataFrame de ilgili DTS için kısımı seçer, Hn değerinden küçük olanları filtreler en üstteki indek max BYS değeri olur.
         BYS = df_bys[dts][df_bys[dts] < Hn].index[0]
         return BYS
 
@@ -407,31 +437,36 @@ class Spectrum:
     
     def SetVariables(self) ->None:
         """Hesaplanmasi gereken değerleri hesaplar ve set eder."""
-        self.ElasticSpectrums = self.__HorizontalElasticSpectrum()
-        self.__HorizontalDisplacementSpectrum()
-        self.__VerticalElasticSpektrum()
-        self.__ReducedTargetSpectrum()
+        self.ElasticSpectrums = self.HorizontalElasticSpectrum(self.BuildingManager.SeismicManager.TA, self.BuildingManager.SeismicManager.TB,self.BuildingManager.SeismicManager.SDs, self.BuildingManager.SeismicManager.SD1, self.BuildingManager.SeismicManager.TL)
+        self.HorizontalDisplacementSpectrum()
+        self.VerticalElasticSpektrum(self.BuildingManager.SeismicManager.TA, self.BuildingManager.SeismicManager.TB,self.BuildingManager.SeismicManager.SDs, self.BuildingManager.BuildingVariables.I)
+        self.ReducedTargetSpectrum(self.BuildingManager.Rx, 
+                                   self.BuildingManager.Dx, 
+                                   self.BuildingManager.Ry, 
+                                   self.BuildingManager.Dy, 
+                                   self.BuildingManager.SeismicManager.TB, 
+                                   self.BuildingManager.BuildingVariables.I)
 
-    def __HorizontalElasticSpectrum(self)-> pd.DataFrame:
+    def HorizontalElasticSpectrum(self,TA : float, TB : float, SDs : float, SD1 : float, TL : float)-> pd.DataFrame:
         """TBDY yatay elastik tasarim spektrumu"""
 
-        T_list = np.arange(0.0, self.SeismicVariables.TL,.005)
+        T_list = np.arange(0.0, TL,.005)
             
         Sa = []
         
         for i in T_list:
             
-            if i <self.SeismicVariables.TA:
-                Sa.append(round((0.4 + 0.6*(i/self.BuildingManager.SeismicVariables.TA))*self.BuildingManager.SeismicVariables.SDs, 4))
+            if i <TA:
+                Sa.append(round((0.4 + 0.6*(i/TA))*SDs, 4))
                 
-            elif i >= self.BuildingManager.SeismicVariables.TA and i <= self.BuildingManager.SeismicVariables.TB:
-                Sa.append(round(self.BuildingManager.SeismicVariables.SDs, 4))
+            elif i >= TA and i <= TB:
+                Sa.append(round(SDs, 4))
                 
-            elif i>self.BuildingManager.SeismicVariables.TB and i <= self.BuildingManager.SeismicVariables.TL:
-                Sa.append(round(self.BuildingManager.SeismicVariables.SD1/i, 4))
+            elif i>TB and i <= TL:
+                Sa.append(round(SD1/i, 4))
                 
-            elif i> self.SeismicVariables.TL:
-                Sa.append(round(self.BuildingManager.SeismicVariables.SD1 * self.BuildingManager.SeismicVariables.TL/(i**2), 4))
+            elif i> TL:
+                Sa.append(round(SD1 * TL/(i**2), 4))
                 
         target_spec = {"T" : T_list,"Sae" : Sa}
 
@@ -440,24 +475,25 @@ class Spectrum:
         
         return target_spec_df
     
-    def __HorizontalDisplacementSpectrum(self) -> None:
+    def HorizontalDisplacementSpectrum(self) -> None:
         """Tbdy elastik tasarim deplasman spektrumunun hesabi"""
         Sde = [(T**2/4*3.14**2)*9.81*Sae for T,Sae in zip(self.ElasticSpectrums["T"],self.ElasticSpectrums["Sae"])]
         self.ElasticSpectrums["Sde"] = Sde
     
-    def __VerticalElasticSpektrum(self) -> None:
+    def VerticalElasticSpektrum(self,TA : float, TB : float, SDs : float, TL : float) -> None:
         """Dusey elastik dizayn spektrumu"""
-        TAD , TBD , TLD = self.SeismicVariables.TA / 3 , self.SeismicVariables.TB / 3 , self.SeismicVariables.TL / 2
+        #TODO Burada TLD değeri yönetmelikte TL değerinin yarısı olarak verilmiş grafikte sorun olmaması için TL değerine kadar hesaplandı.
+        TAD , TBD , TLD = TA / 3 , TB / 3 , TL 
         Sve = []
         for T in self.ElasticSpectrums["T"] :
             if T < TAD :
-                Sve.append(( 0.32 + 0.48*(T/TAD))* self.SeismicVariables.SDs)
+                Sve.append(( 0.32 + 0.48*(T/TAD))* SDs)
                 continue
             elif T >= TAD and T <= TBD:
-                Sve.append(0.8 * self.SeismicVariables.SDs)
+                Sve.append(0.8 * SDs)
                 continue
             elif T> TBD and T <= TLD:
-                Sve.append( 0.8 * self.SeismicVariables.SDs * TBD / T)
+                Sve.append( 0.8 * SDs * TBD / T)
                 continue
             elif T> TLD:
                 Sve.append( np.nan )
@@ -466,7 +502,7 @@ class Spectrum:
 
         del Sve
     
-    def __Get_Ra(self,R : float, D : float, T : float) -> float:
+    def Get_Ra(self,R : float, D : float, T : float, TB : float, I : float) -> float:
         """Verilen doğal titreşim periyoduna göre deprem yükü azaltma katsayisini hesaplar
 
         Args:
@@ -475,18 +511,18 @@ class Spectrum:
         Returns:
             float: Deprem yükü azaltma katsayısı
         """
-        if T > self.SeismicVariables.TB:
-            Ra = R / self.BuildingVariables.I
+        if T > TB:
+            Ra = R / I
         else:
-            Ra = D + ((R/self.BuildingVariables.I)-D)*(T/self.SeismicVariables.TB)
+            Ra = D + ((R/I)-D)*(T/TB)
         return Ra
     
-    def __ReducedTargetSpectrum(self) -> None:
+    def ReducedTargetSpectrum(self, Rx : float, Dx : float, Ry :float, Dy : float, TB : float, I : float) -> None:
         """Azaltilmis elastik tasarim spektrumu"""
         Tw = self.ElasticSpectrums["T"]
 
-        RaT_x = [ self.__Get_Ra(self.BuildingVariables.Rx, self.BuildingVariables.Dx, T) for T in Tw ]
-        RaT_y = [ self.__Get_Ra(self.BuildingVariables.Rx, self.BuildingVariables.Dx, T) for T in Tw ]
+        RaT_x = [ self.Get_Ra(Rx, Dx, T , TB, I) for T in Tw ]
+        RaT_y = [ self.Get_Ra(Ry, Dy, T , TB, I) for T in Tw ]
 
         SaR_x = [(Sa/Ra) for Sa,Ra in zip(self.ElasticSpectrums["Sae"],RaT_x)]
         SaR_y = [(Sa/Ra) for Sa,Ra in zip(self.ElasticSpectrums["Sae"],RaT_y)]
@@ -497,20 +533,20 @@ class Spectrum:
         self.ElasticSpectrums["SaR_y"] = SaR_y
         del SaR_x,SaR_y,RaT_x,RaT_y,Tw
 
-    def Get_Sae_Tp(self,T : float) -> float:
+    def Get_Sae_Tp(self,T : float, TA : float, TB : float, SDs : float, SD1 : float, TL : float) -> float:
         """ Binanin doğal titreşim periyoduna denk gelen elastik spektrum ivme değerini bulur. """
 
-        if T < self.SeismicVariables.TA:
-            Sae = round((0.4 + 0.6*(T/self.SeismicVariables.TA))*self.SeismicVariables.SDs, 4)
+        if T < TA:
+            Sae = round((0.4 + 0.6*(T/TA))*SDs, 4)
             
-        elif T >= self.SeismicVariables.TA and T<=self.SeismicVariables.TB:
-           Sae = round(self.SeismicVariables.SDs, 4)
+        elif T >= TA and T<=TB:
+           Sae = round(SDs, 4)
             
-        elif T > self.SeismicVariables.TB and T <= self.SeismicVariables.TL:
-            Sae = round(self.SeismicVariables.SD1/T, 4)
+        elif T > TB and T <= TL:
+            Sae = round(SD1/T, 4)
             
-        elif T>self.SeismicVariables.TL:
-            Sae = round(self.SeismicVariables.SD1 * self.SeismicVariables.TL / (T**2), 4)
+        elif T>TL:
+            Sae = round(SD1 * TL / (T**2), 4)
         
         return round(Sae,4)
     
@@ -521,19 +557,78 @@ class Spectrum:
         return round(Sae / Ra,4)        
     
     def plot_HorizontalElasticSpectrum(self) -> None:
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(figsize=(5,5))
-        fig.dpi=200
-        ax.grid()
-        ax.axvline(c = "k");ax.axhline(c = "k")
-        ax2 = ax.twinx()
-        ax.plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["Sae"],label="Response Acc. Spec.")
-        ax2.plot(self.ElasticSpectrums["T"],self.ElasticSpectrums["Sde"],label="Response Disp. Spec.",color = 'g')
 
-        ax.set_xlabel('Period (sn)',fontsize = 12)  # Add an x-label to the axes.
-        ax.set_ylabel('Pseudo-Spectral Accelerations (g)',fontsize = 12)  # Add a y-label to the axes.
-        ax2.set_ylabel('Pseudo-Spectral Displacements (m)',fontsize = 12)  # Add a y-label to the axes.
-        ax.set_title("TSC-2018 Design Elastic Spectrum",fontsize = 16)  # Add a title to the axes.
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(12, 8),layout="constrained",dpi=100)
+        
+        subfigs = fig.subfigures(1, 2, wspace=0.07)
+        axs0 = subfigs[0].subplots(2, 1) # sol figure
+        axs1 = subfigs[1].subplots(2, 1) # sağ figure
+
+        # Sol üst taraftaki çizimler
+        axs0[0].grid()
+        axs0[0].axvline(c = "k");axs0[0].axhline(c = "k")
+        axs0[0].set_xlabel('Period (sn)',fontsize = 12)  
+        axs0[0].set_ylabel('Sa(T) (g)',fontsize = 12) 
+        axs0[0].set_title("Horizontal Spectrums",fontsize = 14)  
+
+        axs0[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["Sae"],label="Sae(T)")
+        axs0[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["SaR_x"],label="SaR_x(T)")
+        axs0[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["SaR_y"],label="SaR_y(T)")
+        axs0[0].legend()
+
+        # Sol_alt taraftaki çizimler
+        axs0[1].grid()
+        axs0[1].axvline(c = "k");axs0[1].axhline(c = "k")
+        axs0[1].set_xlabel('Period (sn)',fontsize = 12)  
+        axs0[1].set_ylabel('Ra(T) (g)',fontsize = 12) 
+        axs0[1].set_title("Reduce Coefficient of Seismic Force",fontsize = 14)  
+        axs0[1].plot(self.ElasticSpectrums["T"], self.ElasticSpectrums["RaT_x"],label="Ra_x(T)")
+        axs0[1].plot(self.ElasticSpectrums["T"], self.ElasticSpectrums["RaT_y"],label="Ra_y(T)")
+        axs0[1].legend()
+
+        # Sağ üst taraftaki çizimler
+        axs1[0].grid()
+        axs1[0].axvline(c = "k");axs1[0].axhline(c = "k")
+        axs1[0].set_xlabel('Period (sn)',fontsize = 12)  
+        axs1[0].set_ylabel('Sde(T) (m)',fontsize = 12) 
+        axs1[0].set_title("Design Displacement Spectrum",fontsize = 14)  
+
+        axs1[0].plot(self.ElasticSpectrums["T"],self.ElasticSpectrums["Sde"],label="Sad(T)")
+        axs1[0].legend()
+
+        # Sağ alt taraftaki çizimler
+        axs1[1].grid()
+        axs1[1].axvline(c = "k");axs1[1].axhline(c = "k")
+        axs1[1].set_xlabel('Period (sn)',fontsize = 12)  
+        axs1[1].set_ylabel('Sae_v(T) (g)',fontsize = 12) 
+        axs1[1].set_title("Vertical Spectrum",fontsize = 14) 
+
+        axs1[1].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["Sve"],label="Sve(T)")
+        axs1[1].legend()
+
+        # fig, ax = plt.subplots(nrows=2,layout='constrained')
+        # fig.dpi=200
+        # ax[0].grid();ax[1].grid()
+        # ax[0].axvline(c = "k");ax[0].axhline(c = "k")
+        # ax[1].axvline(c = "k");ax[1].axhline(c = "k")
+
+        # ax[0].set_xlabel('Period (sn)',fontsize = 12)  # Add an x-label to the axes.
+        # ax[0].set_ylabel('Pseudo-Spectral Accelerations (g)',fontsize = 12)  # Add a y-label to the axes.
+        # ax[0].set_title("TSC-2018 Design Elastic Spectrum",fontsize = 16)  # Add a title to the axes.
+
+        # # ax2 = ax.twinx()
+        # ax[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["Sae"],label="Sae(T)")
+        # ax[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["SaR_x"],label="SaR_x(T)")
+        # ax[0].plot(self.ElasticSpectrums["T"] ,self.ElasticSpectrums["SaR_x"],label="SaR_y(T)")
+
+        # ax[1].plot(self.ElasticSpectrums["T"], self.ElasticSpectrums["RaT_x"],label="Ra_x(T)")
+        # ax[1].plot(self.ElasticSpectrums["T"], self.ElasticSpectrums["RaT_y"],label="Ra_y(T)")
+
+        # ax2.plot(self.ElasticSpectrums["T"],self.ElasticSpectrums["Sde"],label="Response Disp. Spec.",color = 'g')       
+        # ax2.set_ylabel('Pseudo-Spectral Displacements (m)',fontsize = 12)  # Add a y-label to the axes.
+
+        plt.legend()
         plt.show()
 
 
@@ -962,9 +1057,10 @@ class TimeSeriesSpectra:
 
 
 def main() ->None:
-    SeismicVariables = SeismicInputs(lat = 39.85,lon = 30.2,soil = "ZC",intensity = "DD2")
-    print("="*80)
+    SeismicVariables = SeismicInputs(lat = 38.12949,lon = 32.45234,soil = "ZC",intensity = "DD2")
     print(SeismicVariables)
+    print("="*80)
+    
 
     RCBuilding = SeismicResistanceBuildingInputs(Hn=70,
                                                  I=1,
@@ -972,13 +1068,26 @@ def main() ->None:
                                                  ResSystemType_X=ResSystemType.BAKarma,
                                                  ResSystemType_Y=ResSystemType.BAKarma,
                                                  SlabSystem=SlabSystem.Plak_kirisli)
-    print("="*80)
     print(RCBuilding)
+    print("="*80)
+    
 
     SIM = SeismicInputsManager(SeismicVariables=SeismicVariables, TL=6.0)
-    print("="*80)
     print(SIM)
+    print("="*80)
+    
+    
+    Srbm = SeismicResistanceBuildingManeger(BuildingVariables=RCBuilding, SeismicManager=SIM, BuildingClass=SeismicResistanceBuildingsClass.A14, Rx=6,Ry=3)
+    Srbm.SetVariables()
+    print("="*80)
 
+    Spec = Spectrum(BuildingManager=Srbm)
+    print(Spec)
+
+    print(Spec.ElasticSpectrums)
+    Spec.plot_HorizontalElasticSpectrum()
+
+    # print(f"DTS = {Srbm.DTS} ; BYS = {Srbm.BYS}")
     # StructureVariables = SeismicResistanceBuildingInputs(Hn  = 70, 
     #                                                      Rx   = 8.0, 
     #                                                      Ry   = 8.0, 
