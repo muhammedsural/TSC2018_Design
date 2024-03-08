@@ -11,7 +11,6 @@ __all__ = ['SeismicInputs',
            'SeismicInputsManager',
            'SeismicResistanceBuildingManeger',
            'Spectrum',
-           'SeismicTSC',
            'TimeSeriesSpectra']
 
 # Spectral values

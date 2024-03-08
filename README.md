@@ -46,7 +46,8 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 ```python
 from TSCMaterialModels import Mander
 from TSCConfimentBarsRules import ConfimentDesign as cd
-from TSCResponseSpectra import SeismicInputs,SeismicTSC,SeismicResistanceBuildingInputs
+from Definitions import DuctilityLevel, ResSystemType, SlabSystem,SeismicResistanceBuildingsClass
+from TSCResponseSpectra import *
 ```
 
 ## 2- Kullanılacak değerler
@@ -112,56 +113,147 @@ mander.Plot_Manders()
 ![ManderPlot](src/Resource/ExampleManderPlot.png)
 
 ## 5-TBDY2018 Hedef Spektrumların Elde Edilmesi
-TBDY2018 de verilen spektrumları elde etmek için sismik girdiler için oluşturulan `SeismicInputs` sınıfından faydalanıyoruz. Bu sınıfı spektrum değerlerini hesaplaması için oluşturulmuş `SeismicTSC` sınıfının girdisi olarak verildiğinde tüm değerler hesaplanmış olacak.
+TBDY2018 de verilen spektrumları elde etmek için sismik girdiler için oluşturulan `SeismicInputs` sınıfından faydalanıyoruz. Sismik verilerin girişi için `SeismicInputs` örnek sınıfımızın instance'nı alıyoruz. Bu sınıf diğer sınıflarda girdi olarak kullanılacak.
 ```python
-SeismicVariables = SeismicInputs(lat        = 39.85, 
-                                 lon        = 30.2, 
-                                 soil       = "ZC", 
-                                 intensity  = "DD2",
-                                 R          = 8.0,
-                                 D          = 3.0,
-                                 I          = 1.0)
-rs = SeismicTSC(Variables = SeismicVariables)
-rs.plot_HorizontalElasticSpectrum()
-```
-![ElasticResponseSpectrums](src/Resource/ElasticResponseSpectrums.png)
-
-`SeismicTSC` içerisindeki `ElasticSpectrums` değişkeninden periyotlar,spektral ivmeler, spektral deplasmanlar,düşey spektral ivmeler, deprem yükü azaltma katsayıları ve azaltılmış spektral ivmeleri içeren pandas DataFrame yapısına erişilebilir.
-```python
-rs.ElasticSpectrums.head(10)
-```
-![df_Spectrums](src/Resource/df_Spectrums.png)
-
-Bu sınıfın referansını `SeismicTSC` sınıfına girdi olarak verdiğimizden dolayı bu referans üzerinden hesaplanan tüm değerler `SeismicVariables` sınıfında da saklanmış olur. Formatlanmış bir şekilde tüm sismik girdiler görüntülenebilir.
-```python
+SeismicVariables = SeismicInputs(lat = 39.85,lon = 30.2,soil = "ZC",intensity = "DD2")
 SeismicVariables
 ```
-![SeismicVariables](src/Resource/SeismicVariables.png)
+<p>Latitude :39.85</p>
+<p>Longitude :30.2</p>
+<p>Soil Class :ZC</p>
+<p>Intensity:DD2</p>
+
+Bina modeli ile ilgili bilgileri `SeismicResistanceBuildingInputs` sınıfında veriyoruz. Burada sınıflandırmalar için `Enum` sınıfları olan `DuctilityLevel`,`ResSystemType`,`SlabSystem` kullandık.
 
 ```python
-StructureVariables
+RCBuilding = SeismicResistanceBuildingInputs(Hn=70,
+                                                 I=1,
+                                                 DuctilLevel=DuctilityLevel.Yuksek,
+                                                 ResSystemType_X=ResSystemType.BAKarma,
+                                                 ResSystemType_Y=ResSystemType.BAKarma,
+                                                 SlabSystem=SlabSystem.Plak_kirisli)
+RCBuilding
 ```
-<p>Hn  : 70 </p> 
-<p>R   : 8.0</p>
-<p>D   : 3.0</p>
-<p>I   : 1.0</p>
-<p>DTS : 1a </p>
-<p>BYS : 2  </p>
 
-Afaddan alınan gerçek değerler aşağıdaki gibidir. Yaklaşık olarak hesaplanan değerlere çok yakın çıkmaktadır.
+<p>Hn :70</p>
+<p>I :1</p>
+<p>DuctilLevel :Yuksek</p>
+<p>ResSystemType_X :BAKarma</p>
+<p>ResSystemType_Y :BAKarma</p>
+<p>SlabSystem :Plak_kirisli</p>
 
-![TDTH_Spectrum](src/Resource/TDTH_Spectrum.png)
+Spektrum değerlerinin bulunması için `SeismicInputsManager` sınıfı kullanılıyor. Bu sınıf `SeismicVariables` sınıfının bilgilerini girdi olarak kullanır ve diğer değerleri `SetVariables` fonksiyonu çalıştırılırsa hesaplayıp sınıf property lerine set eder.
 
-Verilen doğal titreşim periyoduna karşılık gelen elastik spektral ivme
 ```python
-Sae_Tp = rs.Get_Sae_Tp(T=1.2)
+SIM = SeismicInputsManager(SeismicVariables=SeismicVariables, TL=6.0)
+SIM.SetVariables()
+SIM
+```
+
+Ss :0.737
+S1 :0.195
+PGA :0.309
+PGV :18.833
+Fs :1.205
+F1 :1.5
+SDs :0.888085
+SD1 :0.2925
+TA :0.06587207305607008
+TB :0.3293603652803504
+TL :6.0
+
+`SeismicResistanceBuildingManeger` sınıfı bina bilgilerini içeren `SeismicResistanceBuildingInputs` ve sismik verilerin hesabını yapan `SeismicInputsManager` sınıflarını girdi olarak alır ve genel bina sınıflandırma işlemlerini `SetVariables` fonksiyonu çalıştırılarak hesaplar ve propertylere set eder.
+
+```python
+Srbm = SeismicResistanceBuildingManeger(BuildingVariables=RCBuilding, SeismicManager=SIM, BuildingClass=SeismicResistanceBuildingsClass.A14, Rx=6,Ry=3)
+Srbm.SetVariables()
+Srbm
+```
+
+SeismicResistanceBuildingManeger(BuildingVariables=Hn :70
+I :1
+DuctilLevel :Yuksek
+ResSystemType_X :BAKarma
+ResSystemType_Y :BAKarma
+SlabSystem :Plak_kirisli, SeismicManager=Ss :0.737
+S1 :0.195
+PGA :0.309
+PGV :18.833
+Fs :1.205
+F1 :1.5
+SDs :0.888085
+SD1 :0.2925
+TA :0.06587207305607008
+TB :0.3293603652803504
+TL :6.0, BuildingClass=<SeismicResistanceBuildingsClass.A14: 5>, Total_M_DEV=0, Total_M_o=0, DTS=2, BYS=2, Rx=6, Ry=3, Dx=1.0, Dy=1.0)
+
+`Spectrum` sınıfı `SeismicResistanceBuildingManeger` sınıfı kullanarak yapıya ait spektrum bilgilerini `SetVariables` fonksiyonu çalıştırılarak hesaplayıp `ElasticSpectrums` değişkenine set eder. Bu property `pandas.DataFrame` döndürür.
+
+```python
+Spec = Spectrum(BuildingManager=Srbm)
+Spec.SetVariables()
+Spec
+```
+
+Spectrum(BuildingManager=SeismicResistanceBuildingManeger(BuildingVariables=Hn :70
+I :1
+DuctilLevel :Yuksek
+ResSystemType_X :BAKarma
+ResSystemType_Y :BAKarma
+SlabSystem :Plak_kirisli, SeismicManager=Ss :0.737
+S1 :0.195
+PGA :0.309
+PGV :18.833
+Fs :1.205
+F1 :1.5
+SDs :0.888085
+SD1 :0.2925
+TA :0.06587207305607008
+TB :0.3293603652803504
+TL :6.0, BuildingClass=<SeismicResistanceBuildingsClass.A14: 5>, Total_M_DEV=0, Total_M_o=0, DTS=2, BYS=2, Rx=6, Ry=3, Dx=1.0, Dy=1.0))
+
+```python
+Spec.ElasticSpectrums
+Spec
+```
+
+![image](src/Resource/df_Spectrums.png)
+
+Bütün grafiklerin tek seferde gösterimi için `plot_Spectrums` fonksiyonu çalıştırılabilir. Özel olarak hazırlanmış formatta grafikler tek parçada çizdirilir.
+
+```python
+Spec.plot_Spectrums()
+```
+
+![image](src/Resource/AllSpectrums_And_Ra.png)
+
+İlgili sınıflardaki fonksiyonlar tek tekte kullanılabilir. Örneğin belirli bir periyot için elastik ve azaltılmış elastik spektrum değerleri aşağıdaki fonksiyonlar yardımıyla elde edilebilir.
+
+```python
+Sae_Tp = Spec.Get_Sae_Tp(T=1.2,
+                         TA = Spec.BuildingManager.SeismicManager.TA,
+                         TB = Spec.BuildingManager.SeismicManager.TB,
+                         SDs= Spec.BuildingManager.SeismicManager.SDs,
+                         SD1= Spec.BuildingManager.SeismicManager.SD1,
+                         TL = Spec.BuildingManager.SeismicManager.TL 
+                         )
 Sae_Tp
 ```
+
 0.2438
 
-Verilen doğal titreşim periyoduna karşılık gelen azaltılmış elastik spektral ivme
 ```python
-Sar_Tp = rs.Get_SaR_Tp(T=1.2)
+Sar_Tp = Spec.Get_SaR_Tp(R  = Spec.BuildingManager.Rx,
+                         D  = Spec.BuildingManager.Dx,
+                         T  = 1.2,
+                         TB = Spec.BuildingManager.SeismicManager.TB,
+                         I  = Spec.BuildingManager.BuildingVariables.I,
+                         TA = Spec.BuildingManager.SeismicManager.TA,
+                         SDs= Spec.BuildingManager.SeismicManager.SDs,
+                         SD1= Spec.BuildingManager.SeismicManager.SD1,
+                         TL = Spec.BuildingManager.SeismicManager.TL  )
 Sar_Tp
 ```
-0.0305
+
+0.0406
+
