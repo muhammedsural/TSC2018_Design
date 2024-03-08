@@ -1,11 +1,11 @@
-Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yapılarak hesaplanması amaçlanmaktadır.
+This repo aims to calculate the topics in TS500-2000 and TSC2018 by coding them with Python.
 
-# Yapılan ve yapılması hedeflenen konu başlıkları
+# Todo list
 - [x] Design of confining reinforcement in rectangular columns according to TSC2018 .
 - [x] Creation of the steel model with the confined and unconfined mander concrete model specified in ANNEX 5-A of the TSC2018.
 - [x] Creating the spectrum graphs given in section 3  of the TSC2018.
 - [x] Finding the building height class (BYS) and the maximum possible building height according to the information given.
-- [ ] Connection with Etabs(CSI product) program and getting results
+- [x] Connection with Etabs(CSI product) program and getting results
 - [ ] Interstory drift check according to TSC2018
 - [ ] Earthquake record selection, acceleration record reading, spectral acceleration, velocity and displacement series extraction and scaling operations.
 - [ ] LCalculation of strength and ductility increase in columns confined with fibrous polymer
@@ -15,7 +15,7 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 - [ ] External forces in cantilever retaining walls according to TBDY2018.
 
 
-# Repo ile ilgili özet bilgiler
+# Summary of repo
 
 ![PyPI - Version](https://img.shields.io/pypi/v/TSC2018_Design?style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/muhammedsural/TSC2018_Design?style=for-the-badge)

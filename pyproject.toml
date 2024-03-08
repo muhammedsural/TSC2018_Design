@@ -1,6 +1,6 @@
 [project]
 name = "TSC2018_Design"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="Muhammed Sural", email="muhammedsural@gmail.com" },
 ]
