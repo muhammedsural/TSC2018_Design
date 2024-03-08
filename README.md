@@ -1,29 +1,30 @@
 Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yapılarak hesaplanması amaçlanmaktadır.
 
 # Yapılan ve yapılması hedeflenen konu başlıkları
-- [x] Dikdörtgen kolonlarda sargı donatısı tasarımı.
-- [x] TBDY-2018 deprem yönetmeliğinde EK5-A da belirtilen sargılı ve sargısız mander beton modeli ile çelik modelinin oluşturulması.
-- [x] TBDY2018 bölüm 3'te verilen spektrum grafiklerinin çıkarılması.
-- [x] Verilen bilgilere göre BYS sınıfı ve yapılabilecek maximum bina yüksekliğinin bulunması.
-- [ ] Etabs programı ile bağlantı ve sonuçların alınması
-- [ ] Göreli kat öteleme kontrollerinin yapılması
-- [ ] Deprem kaydı seçimi, ivme kaydı okunması, spektral ivme,hız ve deplasman serilerinin çıkarılması ve ölçekleme işlemlerinin yapılması.
-- [ ] Lifli polimer ile sargılanan kolonlarda dayanım ve süneklilik artışının hesabı 
-- [ ] Verilen bilgilere göre performans hedeflerinin bulunması.
-- [ ] TBDY2018'e uygun R ve D katsayıları önermesi.
-- [ ] TBDY2018'e göre Eşdeğer deprem yüklerinin bulunması.
-- [ ] TBDY2018'e göre konsol istinatlarda kuvvetlerin bulunması.
-- [ ] TS500'e göre guse hesabı.
+- [x] Design of confining reinforcement in rectangular columns according to TSC2018 .
+- [x] Creation of the steel model with the confined and unconfined mander concrete model specified in ANNEX 5-A of the TSC2018.
+- [x] Creating the spectrum graphs given in section 3  of the TSC2018.
+- [x] Finding the building height class (BYS) and the maximum possible building height according to the information given.
+- [ ] Connection with Etabs(CSI product) program and getting results
+- [ ] Interstory drift check according to TSC2018
+- [ ] Earthquake record selection, acceleration record reading, spectral acceleration, velocity and displacement series extraction and scaling operations.
+- [ ] LCalculation of strength and ductility increase in columns confined with fibrous polymer
+- [ ] Finding performance targets based on the information provided according to TSC2018
+- [ ] Recommendation of R and D coefficients in accordance with TSC2018.
+- [ ] Finding equivalent lateral loads according to TSC2018.
+- [ ] External forces in cantilever retaining walls according to TBDY2018.
 
 
 # Repo ile ilgili özet bilgiler
-<p align="center">
-  <a href="https://github.com/muhammedsural/TSC2018_Design/graphs/contributors"><img src="https://img.shields.io/github/contributors/muhammedsural/TSC2018_Design?style=for-the-badge"></a>
-  <a href="https://github.com/muhammedsural/TSC2018_Design/network/members"><img src="https://img.shields.io/github/forks/muhammedsural/TSC2018_Design?style=for-the-badge"></a>
-  <a href="https://github.com/muhammedsural/TSC2018_Design/stargazers"><img src="https://img.shields.io/github/stars/muhammedsural/TSC2018_Design?style=for-the-badge"></a>
-  <a href="https://github.com/muhammedsural/TSC2018_Design/issues"><img src="https://img.shields.io/github/issues/muhammedsural/TSC2018_Design?style=for-the-badge"></a>
-  <a href="https://github.com/muhammedsural/TSC2018_Design/blob/master/LICENSE"><img src="https://img.shields.io/github/license/muhammedsural/TSC2018_Design?style=for-the-badge"></a>
-</p><br />
+
+![PyPI - Version](https://img.shields.io/pypi/v/TSC2018_Design?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/muhammedsural/TSC2018_Design?style=for-the-badge)
+![GitHub contributors](https://img.shields.io/github/contributors/muhammedsural/TSC2018_Design?style=for-the-badge)
+![GitHub stars](https://img.shields.io/github/stars/muhammedsural/TSC2018_Design?style=for-the-badge)
+![GitHub issues](https://img.shields.io/github/issues/muhammedsural/TSC2018_Design?style=for-the-badge)
+![GitHub License](https://img.shields.io/github/license/muhammedsural/TSC2018_Design?style=for-the-badge)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/muhammedsural/TSC2018_Design?style=for-the-badge)
+
 
 # 💬 Contact
 
@@ -39,9 +40,16 @@ Bu repoda TS500 ve TBDY2018 deki konuların python yardımı ile kodlaması yap�
 <img src=https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white alt=gmail style="margin-bottom: 5px;" />
 </a> 
 
-# Örnek Çalışma
+# Installing
 
-## 1- Modüllerin import edilmesi
+You can install using pip:
+
+`pip install TSC2018-Design`
+
+
+# Example
+
+## 1- Importing modules
 
 ```python
 from TSCMaterialModels import Mander
@@ -50,7 +58,7 @@ from Definitions import DuctilityLevel, ResSystemType, SlabSystem,SeismicResista
 from TSCResponseSpectra import *
 ```
 
-## 2- Kullanılacak değerler
+## 2- Inputs
 
 ```python
 """Units N,mm"""
@@ -87,7 +95,7 @@ s = ConfinmentDesign.s_OptEndConfArea
 ```
 52
 
-## 4- TBDY2018 malzeme modelleri
+## 4- Material models of TSC2018
 ![Mander](src/Resource/TBDY_Mander_part.png)
 ```python
 mander = Mander(B                    = B,
@@ -112,8 +120,9 @@ mander.Plot_Manders()
 ```
 ![ManderPlot](src/Resource/ExampleManderPlot.png)
 
-## 5-TBDY2018 Hedef Spektrumların Elde Edilmesi
-TBDY2018 de verilen spektrumları elde etmek için sismik girdiler için oluşturulan `SeismicInputs` sınıfından faydalanıyoruz. Sismik verilerin girişi için `SeismicInputs` örnek sınıfımızın instance'nı alıyoruz. Bu sınıf diğer sınıflarda girdi olarak kullanılacak.
+## 5-Creating target spectrum according to TSC2018
+To obtain the spectra given in TBDY2018, we use the `SeismicInputs` class for seismic inputs. For seismic recording input, an instance of our `SeismicInputs` sample class is purchased. This class will also be used in other classes.
+
 ```python
 SeismicVariables = SeismicInputs(lat = 39.85,lon = 30.2,soil = "ZC",intensity = "DD2")
 SeismicVariables
@@ -123,7 +132,7 @@ SeismicVariables
 <p>Soil Class :ZC</p>
 <p>Intensity:DD2</p>
 
-Bina modeli ile ilgili bilgileri `SeismicResistanceBuildingInputs` sınıfında veriyoruz. Burada sınıflandırmalar için `Enum` sınıfları olan `DuctilityLevel`,`ResSystemType`,`SlabSystem` kullandık.
+We provide information about the building model in the `SeismicResistanceBuildingInputs` class. Here we used `DuctilityLevel`, `ResSystemType`, `SlabSystem` which are `Enum` classes for classifications.
 
 ```python
 RCBuilding = SeismicResistanceBuildingInputs(Hn=70,
@@ -142,7 +151,7 @@ RCBuilding
 <p>ResSystemType_Y :BAKarma</p>
 <p>SlabSystem :Plak_kirisli</p>
 
-Spektrum değerlerinin bulunması için `SeismicInputsManager` sınıfı kullanılıyor. Bu sınıf `SeismicVariables` sınıfının bilgilerini girdi olarak kullanır ve diğer değerleri `SetVariables` fonksiyonu çalıştırılırsa hesaplayıp sınıf property lerine set eder.
+`SeismicInputsManager` class is used to find spectrum values. This class uses the information of the `SeismicVariables` class as input and calculates the other values if the `SetVariables` function is run and sets them to the class properties.
 
 ```python
 SIM = SeismicInputsManager(SeismicVariables=SeismicVariables, TL=6.0)
@@ -162,7 +171,7 @@ TA :0.06587207305607008
 TB :0.3293603652803504
 TL :6.0
 
-`SeismicResistanceBuildingManeger` sınıfı bina bilgilerini içeren `SeismicResistanceBuildingInputs` ve sismik verilerin hesabını yapan `SeismicInputsManager` sınıflarını girdi olarak alır ve genel bina sınıflandırma işlemlerini `SetVariables` fonksiyonu çalıştırılarak hesaplar ve propertylere set eder.
+`SeismicResistanceBuildingManeger` class takes `SeismicResistanceBuildingInputs`, which contains building information, and `SeismicInputsManager` classes, which calculate seismic data, as input, and calculates general building classification operations by running the `SetVariables` function and sets properties.
 
 ```python
 Srbm = SeismicResistanceBuildingManeger(BuildingVariables=RCBuilding, SeismicManager=SIM, BuildingClass=SeismicResistanceBuildingsClass.A14, Rx=6,Ry=3)
@@ -219,7 +228,7 @@ Spec
 
 ![image](src/Resource/df_Spectrums.png)
 
-Bütün grafiklerin tek seferde gösterimi için `plot_Spectrums` fonksiyonu çalıştırılabilir. Özel olarak hazırlanmış formatta grafikler tek parçada çizdirilir.
+The `plot_Spectrums` function can be run to display all plots simultaneously. Graphs are drawn in one piece in a specially prepared format.
 
 ```python
 Spec.plot_Spectrums()
@@ -227,7 +236,7 @@ Spec.plot_Spectrums()
 
 ![image](src/Resource/AllSpectrums_And_Ra.png)
 
-İlgili sınıflardaki fonksiyonlar tek tekte kullanılabilir. Örneğin belirli bir periyot için elastik ve azaltılmış elastik spektrum değerleri aşağıdaki fonksiyonlar yardımıyla elde edilebilir.
+Functions in related classes can be used individually. For example, elastic and reduced elastic spectrum values for a certain period can be obtained with the help of the following functions.
 
 ```python
 Sae_Tp = Spec.Get_Sae_Tp(T=1.2,
