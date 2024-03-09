@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from pandas import DataFrame
-from ErrorHandler import ApiReturnError
+from MSCSI.ErrorHandler import ApiReturnError,CustomCommentError
 import numpy as np
+
 
 @dataclass
 class DatabaseTables:
@@ -28,7 +29,7 @@ class DatabaseTables:
         """Clears all tables that were stored in the table list using one of the SetTableForEditing... functions."""  
         self.RefApi.CancelTableEditing()
 
-    def GetAllFieldsInTable(self,TableKey:str) -> list | ApiReturnError:
+    def GetAllFieldsInTable(self,TableKey:str) -> DataFrame | ApiReturnError:
         """Returns the available fields in a specified table.""" 
         TableVersion        = int()
         NumberFields        = int()
@@ -181,7 +182,7 @@ class DatabaseTables:
         result = [FieldKeyList,TableVersion,FieldsKeysIncluded,NumberRecords,TableData,retVal]
         result = self.RefApi.GetTableForDisplayArray(TableKey,FieldKeyList,GroupName,TableVersion,FieldsKeysIncluded,NumberRecords,TableData)
         if result[-1] != 0:
-            raise ApiReturnError(result[-1])
+            raise CustomCommentError(result[-1],"Tablo verisi alinamadi veya veri yok!!!")
         return result
     
     def GetTableForDisplayCSVFile(self,csvFilePath : str, sepChar : str = ","):

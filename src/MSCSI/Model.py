@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
-from Enums import eReturnCode, eUnits
-from ErrorHandler import ApiReturnError
+from MSCSI.Enums import eReturnCode, eUnits
+from MSCSI.ErrorHandler import ApiReturnError
 
 
 @dataclass

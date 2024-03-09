@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pandas import DataFrame
-from Enums import eLoadCaseType, eLoadPatternType
-from ErrorHandler import ApiReturnError
+from MSCSI.Enums import eLoadCaseType, eLoadPatternType
+from MSCSI.ErrorHandler import ApiReturnError
 
 @dataclass
 class LoadCase:

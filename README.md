@@ -18,6 +18,7 @@ This repo aims to calculate the topics in TS500-2000 and TSC2018 by coding them 
 # Summary of repo
 
 ![PyPI - Version](https://img.shields.io/pypi/v/TSC2018_Design?style=for-the-badge)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/TSC2018_Design?style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/muhammedsural/TSC2018_Design?style=for-the-badge)
 ![GitHub contributors](https://img.shields.io/github/contributors/muhammedsural/TSC2018_Design?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/muhammedsural/TSC2018_Design?style=for-the-badge)
@@ -83,7 +84,7 @@ Fctd                    = 10
 Ln                      = 2600
 ```
 
-## 3- TBDY2018 dikdörtgen kolon sargı donatısı tasarımı
+## 3- TSC2018 rectangular column confinement reinforcement design
 
 ```python
 ConfinmentDesign = cd(Nd, fsy, Fctd, Ln, B, H, ClearCoverConc, X_tiebars, Y_tiebars, f_co, fywe, TieRebarDiameter, LongnitRebarDiameter)
@@ -196,7 +197,7 @@ TA :0.06587207305607008
 TB :0.3293603652803504
 TL :6.0, BuildingClass=<SeismicResistanceBuildingsClass.A14: 5>, Total_M_DEV=0, Total_M_o=0, DTS=2, BYS=2, Rx=6, Ry=3, Dx=1.0, Dy=1.0)
 
-`Spectrum` sınıfı `SeismicResistanceBuildingManeger` sınıfı kullanarak yapıya ait spektrum bilgilerini `SetVariables` fonksiyonu çalıştırılarak hesaplayıp `ElasticSpectrums` değişkenine set eder. Bu property `pandas.DataFrame` döndürür.
+The `Spectrum` class calculates the spectrum information of the structure by running the `SetVariables` function using the `SeismicResistanceBuildingManeger` class and sets it to the `ElasticSpectrums` variable. This property returns `pandas.DataFrame`.
 
 ```python
 Spec = Spectrum(BuildingManager=Srbm)

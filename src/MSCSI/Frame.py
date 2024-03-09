@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from Enums import eCNameType, eComboType
-from ErrorHandler import ApiReturnError
+from MSCSI.Enums import eCNameType, eComboType
+from MSCSI.ErrorHandler import ApiReturnError
 
 @dataclass
 class Frame:

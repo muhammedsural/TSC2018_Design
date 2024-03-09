@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any
-from ErrorHandler import ApiReturnError
+from MSCSI.ErrorHandler import ApiReturnError
 
 
 @dataclass

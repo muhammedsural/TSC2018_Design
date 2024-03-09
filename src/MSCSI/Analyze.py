@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from ErrorHandler import ApiReturnError
+from MSCSI.ErrorHandler import ApiReturnError
 
 
 @dataclass

@@ -1,4 +1,4 @@
-from Enums import eReturnCode
+from MSCSI.Enums import eReturnCode
 
 class CustomconnectionError(Exception):
     """Sap2000 or Etabs connection error"""

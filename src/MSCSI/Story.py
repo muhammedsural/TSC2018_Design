@@ -1,7 +1,7 @@
 
 from dataclasses import asdict, dataclass, field
 from pandas import DataFrame
-from ErrorHandler import CustomCommentError
+from MSCSI.ErrorHandler import CustomCommentError
 
 
 @dataclass
