@@ -51,7 +51,7 @@ jobs:
                 verbose: true
                 user: __tokentsc__
                 password: ${{ secrets.TSCTOKEN }}
-                repository-url: https://test.pypi.org/legacy/
+                repository-url: https://pypi.org/legacy/
     
     github-release:
         name: >-
