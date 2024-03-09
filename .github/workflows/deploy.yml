@@ -49,9 +49,9 @@ jobs:
             uses: pypa/gh-action-pypi-publish@release/v1
             with:
                 verbose: true
-                user: __tokentsc__
-                password: ${{ secrets.TSCTOKEN }}
-                repository-url: https://pypi.org/legacy/
+                user: __token__
+                password: ${{ secrets.PYPI_API_TOKEN }}
+                repository-url: https://upload.pypi.org/legacy/
     
     github-release:
         name: >-
