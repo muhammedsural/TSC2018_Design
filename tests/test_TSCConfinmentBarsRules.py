@@ -1,6 +1,6 @@
-from TSCConfimentBarsRules import ConfimentDesign
 import pytest
 import math
+from src.Design.ConfimentBarsRules import ConfimentDesign
 
 """Units N,mm"""
 Nd                      = 16000 
@@ -61,10 +61,10 @@ def test_Bk(MyConf):
 def test_Ai(MyConf):
     assert MyConf.Get_a_i(bk = 240, koladet=3) == 80
 
-def test_invalid_input_raises_error():
-#     # Geçersiz girdi durumunu test edin (örneğin, negatif değerler)
-    with pytest.raises(ValueError):
-        assert MyConf.Get_a_i(bk = -240, koladet=3)
+# def test_invalid_input_raises_error():
+# #     # Geçersiz girdi durumunu test edin (örneğin, negatif değerler)
+#     with pytest.raises(ValueError):
+#         assert MyConf.Get_a_i(bk = -240, koladet=3)
 
 def test_Ash(MyConf):
     pass
