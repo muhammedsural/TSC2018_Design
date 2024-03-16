@@ -12,7 +12,8 @@ dependencies = [
   "pandas",
   "numpy",
   "scipy",
-  "pytest"
+  "pytest",
+  "attr >= 23.0.0"
 ]
 keywords = ["TSC2018", "ETABS", "SAP2000", "DESIGN", "TS500-2000"]
 classifiers = [

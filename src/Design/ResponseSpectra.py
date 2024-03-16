@@ -1,10 +1,9 @@
-from Decorators import log_decorator, performance_decorator, timer
 import pandas as pd
 from dataclasses import dataclass,field,asdict
 import numpy as np 
 import scipy as sc
 import matplotlib.pyplot as plt
-from Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
+from Design.Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
 
 __all__ = ['SeismicInputs',
            'SeismicResistanceBuildingInputs',
@@ -613,7 +612,7 @@ class TimeSeriesSpectra:
     
     def calc_timegap(Td : float, damp_ratio : float, T : float) -> float:
         """
-        INFO
+        SUMMARY
             "Required time gap between mainshock and aftershock for dynamic analysis of structures" makalesinde iki ardışık deprem arasında doğal hareketi sıfırlamak için gerekli olan zaman aralığının hesaplanmasındaki  önerilen formülasyon kullanılmıştır.
         INPUT
             Td          : Kuvvetli yer hareketi süresi
