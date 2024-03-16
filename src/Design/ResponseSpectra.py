@@ -612,7 +612,7 @@ class TimeSeriesSpectra:
     
     def calc_timegap(Td : float, damp_ratio : float, T : float) -> float:
         """
-        INFO
+        SUMMARY
             "Required time gap between mainshock and aftershock for dynamic analysis of structures" makalesinde iki ardışık deprem arasında doğal hareketi sıfırlamak için gerekli olan zaman aralığının hesaplanmasındaki  önerilen formülasyon kullanılmıştır.
         INPUT
             Td          : Kuvvetli yer hareketi süresi
