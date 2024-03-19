@@ -26,7 +26,7 @@ F1_table = {"ZA": [0.8 , 0.8 , 0.8 , 0.8 , 0.8 , 0.8],
             "ZD": [2.4 , 2.2 , 2.0 , 1.9 , 1.8 , 1.7],
             "ZE": [4.2 , 3.3 , 2.8 , 2.4 , 2.2 , 2.0]}
 
-TDTH = "Resource\\AFAD_TDTH_parametre.csv"
+TDTH = ".\\TSC\\Resource\\AFAD_TDTH_parametre.csv"
 
 TABLE41 = pd.DataFrame({
     1  : [8, 3  , 3],
@@ -191,16 +191,16 @@ class SeismicInputsManager:
         TL        : Long period (Uzun periyod)
     """
     SeismicVariables : SeismicInputs = field(default_factory=SeismicInputs)
-    Ss        : float  = field(init=False)
-    S1        : float  = field(init=False)
-    PGA       : float  = field(init=False)
-    PGV       : float  = field(init=False)
-    Fs        : float  = field(init=False)
-    F1        : float  = field(init=False)
-    SDs       : float  = field(init=False)
-    SD1       : float  = field(init=False)
-    TA        : float  = field(init=False)
-    TB        : float  = field(init=False)
+    Ss        : float  = field(default=0.)
+    S1        : float  = field(default=0.)
+    PGA       : float  = field(default=0.)
+    PGV       : float  = field(default=0.)
+    Fs        : float  = field(default=0.)
+    F1        : float  = field(default=0.)
+    SDs       : float  = field(default=0.)
+    SD1       : float  = field(default=0.)
+    TA        : float  = field(default=0.)
+    TB        : float  = field(default=0.)
     TL        : float  = field(default=6.)
 
     
