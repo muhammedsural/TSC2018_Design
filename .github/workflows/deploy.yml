@@ -5,7 +5,7 @@ on:
     branches:    
       - main
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+.[0-9]"
+      - 'v*'
 
 jobs:
     build:
@@ -72,20 +72,28 @@ jobs:
           with:
             name: python-package-distributions
             path: dist/
+        
         - name: Sign the dists with Sigstore
           uses: sigstore/gh-action-sigstore-python@v1.2.3
           with:
             inputs: >-
               ./dist/*.tar.gz
               ./dist/*.whl
+
         - name: Create GitHub Release
+          id: create_release
+          uses: actions/create-release@v1
           env:
             GITHUB_TOKEN: ${{ github.token }}
-          run: >-
-            gh release create
-            '${{ github.ref_name }}'
-            --repo '${{ github.repository }}'
-            --notes ""
+          with:
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref }}
+            body: |
+                Changes in this Release
+                - First Change
+                - Second Change
+            draft: false
+            prerelease: false
         - name: Upload artifact signatures to GitHub Release
           env:
             GITHUB_TOKEN: ${{ github.token }}
