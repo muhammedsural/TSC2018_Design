@@ -6,10 +6,9 @@ This repo aims to calculate the topics in TS500-2000 and TSC2018 by coding them 
 - [x] Creating the spectrum graphs given in section 3  of the TSC2018.
 - [x] Finding the building height class (BYS) and the maximum possible building height according to the information given.
 - [x] Connection with Etabs(CSI product) program and getting results
-- [x] Fibrous polymer calculations added according to TSC2018
+- [x] Calculation of strength and ductility increase in columns confined with fibrous polymer
 - [ ] Interstory drift check according to TSC2018
 - [ ] Earthquake record selection, acceleration record reading, spectral acceleration, velocity and displacement series extraction and scaling operations.
-- [ ] LCalculation of strength and ductility increase in columns confined with fibrous polymer
 - [ ] Finding performance targets based on the information provided according to TSC2018
 - [ ] Recommendation of R and D coefficients in accordance with TSC2018.
 - [ ] Finding equivalent lateral loads according to TSC2018.
