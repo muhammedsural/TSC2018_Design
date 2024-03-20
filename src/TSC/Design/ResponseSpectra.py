@@ -3,7 +3,7 @@ from dataclasses import dataclass,field,asdict
 import numpy as np 
 import scipy as sc
 import matplotlib.pyplot as plt
-from Design.Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
+from TSC.Design.Definitions import DuctilityLevel,ResSystemType, SeismicResistanceBuildingsClass,SlabSystem,SeismicDesignClass
 
 __all__ = ['SeismicInputs',
            'SeismicResistanceBuildingInputs',

@@ -1,5 +1,5 @@
 
-from MSCSI.Enums import eMatType
+from TSC.MSCSI.Enums import eMatType
 
 
 class PropMaterial:

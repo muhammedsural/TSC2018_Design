@@ -98,7 +98,7 @@ s = ConfinmentDesign.s_OptEndConfArea
 52
 
 ## 4- Material models of TSC2018
-![Mander](src/Resource/TBDY_Mander_part.png)
+![Mander](_static/TBDY_Mander_part.png)
 ```python
 mander = Mander(B                    = B,
                 H                    = H,
@@ -120,7 +120,7 @@ mander = Mander(B                    = B,
 
 mander.Plot_Manders()
 ```
-![ManderPlot](src/Resource/ExampleManderPlot.png)
+![ManderPlot](_static/ExampleManderPlot.png)
 
 ## 5-Creating target spectrum according to TSC2018
 To obtain the spectra given in TBDY2018, we use the `SeismicInputs` class for seismic inputs. For seismic recording input, an instance of our `SeismicInputs` sample class is purchased. This class will also be used in other classes.
@@ -228,7 +228,7 @@ Spec.ElasticSpectrums
 Spec
 ```
 
-![image](src/Resource/df_Spectrums.png)
+![image](_static/df_Spectrums.png)
 
 The `plot_Spectrums` function can be run to display all plots simultaneously. Graphs are drawn in one piece in a specially prepared format.
 
@@ -236,7 +236,7 @@ The `plot_Spectrums` function can be run to display all plots simultaneously. Gr
 Spec.plot_Spectrums()
 ```
 
-![image](src/Resource/AllSpectrums_And_Ra.png)
+![image](_static/AllSpectrums_And_Ra.png)
 
 Functions in related classes can be used individually. For example, elastic and reduced elastic spectrum values for a certain period can be obtained with the help of the following functions.
 

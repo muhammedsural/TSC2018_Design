@@ -2,7 +2,7 @@ import comtypes.client
 import os
 import sys
 
-from MSCSI.ErrorHandler import ApiReturnError
+from TSC.MSCSI.ErrorHandler import ApiReturnError
 
 def ConnectionEtabs(ModelPath : str = None):
 

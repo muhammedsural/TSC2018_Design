@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pandas import DataFrame
-from MSCSI.ErrorHandler import ApiReturnError,CustomCommentError
+from TSC.MSCSI.ErrorHandler import ApiReturnError,CustomCommentError
 import numpy as np
 
 

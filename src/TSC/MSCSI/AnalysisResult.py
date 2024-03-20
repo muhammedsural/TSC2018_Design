@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field,asdict
 from typing import Any
 from pandas import DataFrame
-from MSCSI.Enums import eItemTypeElm
-from MSCSI.ErrorHandler import CustomCommentError
+from TSC.MSCSI.Enums import eItemTypeElm
+from TSC.MSCSI.ErrorHandler import CustomCommentError
 
 # Tamamlananlar
 @dataclass

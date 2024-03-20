@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from MSCSI.ErrorHandler import CustomCommentError
+from TSC.MSCSI.ErrorHandler import CustomCommentError
 
 
 @dataclass

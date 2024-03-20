@@ -1,8 +1,8 @@
 
 from dataclasses import dataclass
 
-from MSCSI.Enums import eLoadPatternType
-from MSCSI.ErrorHandler import ApiReturnError
+from TSC.MSCSI.Enums import eLoadPatternType
+from TSC.MSCSI.ErrorHandler import ApiReturnError
 
 
 @dataclass
