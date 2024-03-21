@@ -76,3 +76,6 @@ def ConnectionEtabs(ModelPath : str = None):
         if ret != 0:
             raise ApiReturnError(ret)
     return SapModel,myETABSObject
+
+# if __name__ == "__main__":
+#     MySapModel,myETABSObject  = ConnectionEtabs()
