@@ -95,50 +95,252 @@ class CaseHyperStatic:
             raise ApiReturnError(result[-1])
         return result
 
-    def SetBaseCase(self,Referance : object, Name : str):
-        pass
+    def SetBaseCase(self,Referance : object, Name : str, HyperStaticCase : str) -> None | ApiReturnError:
+        """Sets the base case for the specified hyperstatic load case 
 
-    def SetCase(self,Referance : object, Name : str):
-        pass
+        Args:
+            Referance (object): SapModel.LoadCases.HyperStatic
+            Name (str): The name of an existing hyperstatic load case
+            HyperStaticCase (str): The name of an existing static linear load case that is the base case for the specified hyperstatic load case 
+
+        Raises:
+            ApiReturnError: Return error code and message
+        """
+        result = Referance.SetBaseCase(Name,HyperStaticCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetCase(self,Referance : object, Name : str) -> None | ApiReturnError:
+        """Initializes a hyperstatic load case. If this function is called for an existing load case, all items for the case are reset to their default value 
+
+        Args:
+            Referance (object): SapModel.LoadCases.HyperStatic
+            Name (str): The name of an existing or new load case. If this is an existing case, that case is modified; otherwise, a new case is added
+
+        Raises:
+            ApiReturnError: Return error code and message
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetBaseCase(Name)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
 
 class CaseModalEigen:
 
-    def GetInitialCase(self):
-        pass
+    def GetInitialCase(self, Referance : object, Name : str) -> list | ApiReturnError:
+        """_summary_
 
-    def GetLoads(self):
-        pass
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
 
-    def GetNumberModes(self):
-        pass
+        Raises:
+            ApiReturnError: _description_
 
-    def GetParameters(self):
-        pass
+        Returns:
+            list | ApiReturnError: _description_
+        """
+        InitialCase = str()
+        retVal = 0
+        result = [Name,InitialCase,retVal]
+        result = Referance.GetParameters(Name,InitialCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
-    def SetCase(self):
-        pass
+    def GetLoads(self, Referance : object, Name : str) -> list | ApiReturnError:
+        """_summary_
 
-    def SetInitialCase(self):
-        pass
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
 
-    def SetLoads(self):
-        pass
+        Raises:
+            ApiReturnError: _description_
 
-    def SetNumberModes(self):
-        pass
+        Returns:
+            list | ApiReturnError: _description_
+        """
+        NumberLoads    = int()
+        LoadType       = list([])
+        LoadName       = list([])
+        TargetPar      = list([])
+        StaticCorrect  = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,TargetPar,StaticCorrect,retVal]
+        result = Referance.GetParameters(Name,NumberLoads,LoadType,LoadName,TargetPar,StaticCorrect)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
-    def SetParameters(self):
-        pass
+    def GetNumberModes(self, Referance : object, Name : str) -> list | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            list | ApiReturnError: _description_
+        """
+        MaxModes = int()
+        MinModes = int()
+        retVal = 0
+        result = [Name,MaxModes,MinModes,retVal]
+        result = Referance.GetParameters(Name,MaxModes,MinModes)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def GetParameters(self, Referance : object, Name : str) -> list | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): The name of an existing modal Eigen load case. 
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            list | ApiReturnError: _description_
+        """
+        EigenShiftFreq = float()
+        EigenCutOff = float()
+        EigenTol = float()
+        AllowAutoFreqShift = int()
+        retVal = 0
+        result = [Name,EigenShiftFreq,EigenCutOff,EigenTol,AllowAutoFreqShift,retVal]
+        result = Referance.GetParameters(Name,EigenShiftFreq,EigenCutOff,EigenTol,AllowAutoFreqShift)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+        
+    def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetCase(Name)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetInitialCase(self, Referance : object, Name : str, InitialCase : str) -> None | ApiReturnError:
+        """This function sets the initial condition for the specified load case. 
+
+        Args:
+            Referance (object): _description_
+            Name (str): The name of an existing modal Eigen load case. 
+            InitialCase (str): This is blank, None, or the name of an existing analysis case. This item specifies if the load case starts from zero initial conditions, that is, an unstressed state, or if it starts using the stiffness that occurs at the end of a nonlinear static or nonlinear direct integration time history load case. If the specified initial case is a nonlinear static or nonlinear direct integration time history load case, the stiffness at the end of that case is used. If the initial case is anything else, zero initial conditions are assumed. 
+
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetInitialCase(Name,InitialCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
+        """This function sets the load data for the specified load case. 
+
+        Args:
+            Referance (object): SapModel.LoadCases.ModalEigen
+            Name (str): The name of an existing modal Eigen load case. 
+            NumberLoads (int): The number of loads assigned to the specified analysis case. 
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        retVal = 0
+        LoadType      = list([])
+        LoadName      = list([])
+        TargetPar     = list([])
+        StaticCorrect = list([])
+        result = [Name,NumberLoads,LoadType,LoadName,TargetPar,StaticCorrect,retVal]
+        result = Referance.SetLoads(Name,NumberLoads,LoadType,LoadName,TargetPar,StaticCorrect)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetNumberModes(self, Referance : object, Name : str, MaxModes : int, MinModes : int) -> None | ApiReturnError:
+        """This function sets the number of modes requested for the specified load case. 
+
+        Args:
+            Referance (object): SapModel.LoadCases.ModalEigen
+            Name (str): The name of an existing modal Eigen load case.
+            MaxModes (int): The maximum number of modes requested. 
+            MinModes (int): The minimum number of modes requested. 
+
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetNumberModes(Name,MaxModes,MinModes)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetParameters(self, Referance : object, Name : str, EigenShiftFreq : float, EigenCutOff : float, EigenTol : float, AllowAutoFreqShift : int) -> None | ApiReturnError:
+        """This function sets various parameters for the specified load case. 
+
+        Args:
+            Referance (object): SapModel.LoadCases.ModalEigen
+            Name (str): The name of an existing modal Eigen load case. 
+            EigenShiftFreq (float): The Eigenvalue shift frequency. [cyc/s] 
+            EigenCutOff (float): The Eigencutoff frequency radius. [cyc/s] 
+            EigenTol (float): The relative convergence tolerance for Eigenvalues. 
+            AllowAutoFreqShift (int): This is either 0 or 1, indicating if automatic frequency shifting is allowed. 
+                                        0 = Automatic frequency shifting is NOT allowed 
+                                        1 = Automatic frequency shifting Is allowed 
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetParameters(Name,EigenShiftFreq,EigenCutOff,EigenTol,AllowAutoFreqShift)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
 
 class CaseModalHistoryLinear:
 
-    def GetLoads(self):
+    def GetLoads(self,Referance : object, Name : str) -> list | ApiReturnError:
+        NumberLoads = int()
+        LoadType    = list([])
+        LoadName    = list([])
+        Func        = list([])
+        SF          = list([])
+        Tf          = list([])
+        At          = list([])
+        CSys        = list([])
+        Ang         = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang,retVal]
+        result = Referance.GetParameters(Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def SetCase(self) -> None | ApiReturnError:
         pass
 
-    def SetCase(self):
-        pass
-
-    def SetLoads(self):
+    def SetLoads(self) -> None | ApiReturnError:
         pass
 
 class CaseModalHistoryNonlinear:
