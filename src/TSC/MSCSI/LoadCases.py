@@ -332,92 +332,211 @@ class CaseModalHistoryLinear:
         Ang         = list([])
         retVal = 0
         result = [Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang,retVal]
-        result = Referance.GetParameters(Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang)
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang)
         if result[-1] != 0:
             raise ApiReturnError(result[-1])
         return result
 
-    def SetCase(self) -> None | ApiReturnError:
-        pass
+    def SetCase(self,Referance : object, Name : str) -> None | ApiReturnError:
+        result = Referance.SetCase(Name)
+        if result != 0:
+            raise ApiReturnError(result)
 
-    def SetLoads(self) -> None | ApiReturnError:
-        pass
+    def SetLoads(self,Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
+        LoadType    = list([])
+        LoadName    = list([])
+        Func        = list([])
+        SF          = list([])
+        Tf          = list([])
+        At          = list([])
+        CSys        = list([])
+        Ang         = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang,retVal]
+        result = Referance.SetLoads(Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
 class CaseModalHistoryNonlinear:
-    def GetLoads(self):
-        pass
+
+    def GetLoads(self,Referance : object, Name : str) -> list | ApiReturnError:
+        NumberLoads = int()
+        LoadType    = list([])
+        LoadName    = list([])
+        Func        = list([])
+        SF          = list([])
+        Tf          = list([])
+        At          = list([])
+        CSys        = list([])
+        Ang         = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,Func,SF,Tf,At,CSys,Ang)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
 class CaseModalRitz:
     
-    def GetInitialCase(self):
-        pass
+    def GetInitialCase(self, Referance : object, Name : str) -> list | ApiReturnError:
+        """Name:    The name of an existing modal Ritz load case.
+InitialCase: This is blank, None, or the name of an existing analysis case. This item specifies if the load case starts from zero initial conditions, that is, an unstressed state, or if it starts using the stiffness that occurs at the end of a nonlinear static or nonlinear direct integration time history load case. 
+If the specified initial case is a nonlinear static or nonlinear direct integration time history load case, the stiffness at the end of that case is used. If the initial case is anything else, zero initial conditions are assumed. 
 
-    def GetLoads(self):
-        pass
 
-    def GetNumberModes(self):
-        pass
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
 
-    def SetCase(self):
-        pass
+        Raises:
+            ApiReturnError: _description_
 
-    def SetInitialCase(self):
-        pass
+        Returns:
+            list | ApiReturnError: _description_
+        """
+        InitialCase = str()
+        retVal = 0
+        result = [Name,InitialCase,retVal]
+        result = Referance.GetInitialCase(Name,InitialCase,retVal)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
-    def SetLoads(self):
-        pass
+    def GetLoads(self, Referance : object, Name : str):
+        """Name:    The name of an existing modal Ritz load case. 
+        NumberLoads: The number of loads assigned to the specified analysis case. 
+        LoadType:   This is an array that includes Load, Accel or Link, indicating the type of each load assigned to the load case. 
+        LoadName:   This is an array that includes the name of each load assigned to the load case. If the LoadType item is Load, this item is the name of a defined load pattern. If the LoadType item is Accel, this item is UX, UY, UZ, RX, RY or RZ, indicating the direction of the load. If the LoadType item is Link, this item is not used. 
+        RitzMaxCyc: This is an array that includes the maximum number of generation cycles to be performed for the specified ritz starting vector. A value of 0 means there is no limit on the number of cycles. 
+        TargetPar:  This is an array that includes the target mass participation ratio. 
 
-    def SetNumberModes(self):
-        pass
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        NumberLoads = int()
+        LoadType    = list([])
+        LoadName    = list([])
+        RitzMaxCyc  = list([])
+        TargetPar   = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,RitzMaxCyc,TargetPar,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,RitzMaxCyc,TargetPar)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def GetNumberModes(self, Referance : object, Name : str):
+        MaxModes = int()
+        MinModes = int()
+        retVal = 0
+        result = [Name,MaxModes,MinModes,retVal]
+        result = Referance.GetNumberModes(Name,MaxModes,MinModes)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def SetCase(self, Referance : object, Name : str):
+        result = Referance.SetCase(Name)
+        if result != 0:
+            raise ApiReturnError(result)
+
+    def SetInitialCase(self, Referance : object, Name : str, InitialCase : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): SapModel.LoadCases.ModalRitz
+            Name (str): The name of an existing modal Ritz load case.
+            InitialCase (str): This is blank, None, or the name of an existing analysis case. This item specifies if the load case starts from zero initial conditions, that is, an unstressed state, or if it starts using the stiffness that occurs at the end of a nonlinear static or nonlinear direct integration time history load case. If the specified initial case is a nonlinear static or nonlinear direct integration time history load case, the stiffness at the end of that case is used. If the initial case is anything else, zero initial conditions are assumed.
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
+        result = Referance.SetInitialCase(Name,InitialCase)
+        if result != 0:
+            raise ApiReturnError(result[-1])
+
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int):
+        LoadType    = list([])
+        LoadName    = list([])
+        RitzMaxCyc  = list([])
+        TargetPar   = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,RitzMaxCyc,TargetPar,retVal]
+        result = Referance.SetLoads(Name,NumberLoads,LoadType,LoadName,RitzMaxCyc,TargetPar)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def SetNumberModes(self, Referance : object, Name : str, MaxModes : int, MinModes : int):
+        result = Referance.SetNumberModes(Name,MaxModes,MinModes)
+        if result != 0:
+            raise ApiReturnError(result)
 
 class CaseResponseSpectrum:
 
-    def GetDampConstant(self):
+    def GetDampConstant(self,Referance : object, Name : str) -> list | ApiReturnError:
+        retVal = 0
+        Damp = float()
+        result = [Name,Damp,retVal]
+        result = Referance.GetDampConstant(Name,Damp)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+
+    def GetDampInterpolated(self,Referance : object, Name : str):
         pass
 
-    def GetDampInterpolated(self):
+    def GetDampOverrides(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetDampOverrides(self):
+    def GetDampProportional(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetDampProportional(self):
+    def GetDampType(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetDampType(self):
+    def GetDiaphragmEccentricityOverride(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetDiaphragmEccentricityOverride(self):
+    def GetDirComb(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetDirComb(self):
+    def GetEccentricity(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetEccentricity(self):
+    def GetLoads(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetLoads(self):
+    def GetModalCase(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetModalCase(self):
+    def GetModalComb(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetModalComb(self):
+    def GetModalComb_1(self, Referance : object, Name : str) -> list | ApiReturnError:
         pass
 
-    def GetModalComb_1(self):
+    def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
         pass
 
-    def SetCase(self):
+    def SetEccentricity(self, Referance : object, Name : str) -> None | ApiReturnError:
         pass
 
-    def SetEccentricity(self):
+    def SetLoads(self, Referance : object, Name : str) -> None | ApiReturnError:
         pass
 
-    def SetLoads(self):
-        pass
-
-    def SetModalCase(self):
+    def SetModalCase(self, Referance : object, Name : str) -> None | ApiReturnError:
         pass
 
 class CaseStaticLinear:
@@ -667,3 +786,19 @@ class LoadCase:
             print("Operation completed...")      
 
 
+def main()->None:
+    from TSC.MSCSI.Connector import ConnectionEtabs
+    from TSC.MSCSI.Model import SapModel
+
+    ModelPath="C:\\CSi_ETABS_API_Example\\ETABS_API_Example.EDB"
+    MySapModel,myETABSObject  = ConnectionEtabs(ModelPath)
+    etabs                   = SapModel(RefApi=MySapModel)
+    loadCase        = LoadCase(RefApi=MySapModel.LoadCases)
+    if etabs.GetModelIsLocked():
+        etabs.SetModelIsLocked(Lockit=False)
+    # CaseModalRitz Testing
+    loadCase.ModalRitz.SetCase(Referance=loadCase.RefApi.ModalRitz,Name='Ritz1')
+    pass
+
+if __name__ == "__main__":
+    main()

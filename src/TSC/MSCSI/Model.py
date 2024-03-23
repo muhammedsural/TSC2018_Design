@@ -76,31 +76,27 @@ class SapModel:
          if val != 0:
             raise ApiReturnError(val)
          
-    def SetMergeTol(self, MergeTol: float) -> int:
+    def SetMergeTol(self, MergeTol: float) -> None | ApiReturnError:
          val = self.RefApi.SetMergeTol(MergeTol)
          if val != 0:
             raise ApiReturnError(val)
-         return val
     
-    def SetModelIsLocked(self, Lockit : bool) -> int:
+    def SetModelIsLocked(self, Lockit : bool) -> None | ApiReturnError:
          val = self.RefApi.SetModelIsLocked(Lockit)
          if val != 0:
             raise ApiReturnError(val)
-         return val
     
-    def SetPresentUnits(self,Units : int) -> int:
+    def SetPresentUnits(self,Units : int) -> None | ApiReturnError:
          val = self.RefApi.SetPresentUnits(Units)
          if val != 0:
             raise ApiReturnError(val)
-         return val
     
-    def SetPresentUnits_2(self, forceUnits:int, lengthUnits:int, temperatureUnits:int) -> int:
+    def SetPresentUnits_2(self, forceUnits:int, lengthUnits:int, temperatureUnits:int) -> None | ApiReturnError:
          val = self.RefApi.SetPresentUnits_2(forceUnits,lengthUnits,temperatureUnits)
          if val != 0:
             raise ApiReturnError(val)
-         return val
     
-    def SetProjectInfo(self,Item : str, Data : str) -> int:
+    def SetProjectInfo(self,Item : str, Data : str) -> None | ApiReturnError:
         """_summary_
 
         Args:
@@ -118,7 +114,6 @@ class SapModel:
         val = self.RefApi.SetProjectInfo(Item,Data)
         if val != 0:
             raise ApiReturnError(val)
-        return val
     
     def TreeIsUpdateSuspended(self,IsSuspended : bool):
          val = self.RefApi.TreeIsUpdateSuspended(IsSuspended)
