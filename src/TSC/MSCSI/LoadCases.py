@@ -495,130 +495,385 @@ class CaseResponseSpectrum:
         return result
 
     def GetDampInterpolated(self,Referance : object, Name : str):
-        pass
+        DampType    = int()
+        NumberItems = int() 
+        Time        = list([])
+        Damp        = list([]) 
+        retVal = 0
+        result = [Name,DampType,NumberItems,Time,Damp,retVal]
+        result = Referance.GetDampInterpolated(Name,DampType,NumberItems,Time,Damp)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetDampOverrides(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        NumberItems = int()
+        Mode = list([])
+        Damp        = list([]) 
+        retVal = 0
+        result = [Name,NumberItems,Mode,Damp,retVal]
+        result = Referance.GetDampOverrides(Name,NumberItems,Mode,Damp)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetDampProportional(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        DampType = int()
+        DampA    = float() 
+        DampB    = float()
+        DampF1   = float()
+        DampF2   = float()
+        DampD1   = float()
+        DampD2   = float()
+        retVal = 0
+        result = [Name,DampType,DampA,DampB,DampF1,DampF2,DampD1,DampD2,retVal]
+        result = Referance.GetDampProportional(Name,DampType,DampA,DampB,DampF1,DampF2,DampD1,DampD2)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetDampType(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        DampType = int()
+        retVal = 0
+        result = [Name,DampType,retVal]
+        result = Referance.GetDampType(Name,DampType)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetDiaphragmEccentricityOverride(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        Num = int()
+        Diaph = list([])
+        Eccen = list([])
+        retVal = 0
+        result = [Name,Num,Diaph,Eccen,retVal]
+        result = Referance.GetDiaphragmEccentricityOverride(Name,Num,Diaph,Eccen)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetDirComb(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        MyType = int()
+        SF = float()
+        retVal = 0
+        result = [Name,MyType,SF,retVal]
+        result = Referance.GetDirComb(Name,MyType,SF)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetEccentricity(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
-
+        Eccen = float()
+        retVal = 0
+        result = [Name,Eccen,retVal]
+        result = Referance.GetEccentricity(Name,Eccen)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+    
     def GetLoads(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        NumberLoads = int()
+        LoadName = list([])
+        Func = list([])
+        SF = list([])
+        CSys = list([])
+        Ang = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadName,Func,SF,CSys,Ang,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadName,Func,SF,CSys,Ang)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetModalCase(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        ModalCase = str()
+        retVal = 0
+        result = [Name,ModalCase,retVal]
+        result = Referance.GetModalCase(Name,ModalCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetModalComb(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        MyType = int()
+        F1 = float()
+        F2 = float()
+        Td = float()
+        retVal = 0
+        result = [Name,MyType,F1,F2,Td,retVal]
+        result = Referance.GetModalComb(Name,MyType,F1,F2,Td)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def GetModalComb_1(self, Referance : object, Name : str) -> list | ApiReturnError:
-        pass
+        MyType = int()
+        F1 = float()
+        F2 = float()
+        PeriodicRigidCombType = int()
+        Td = float()
+        retVal = 0
+        result = [Name,MyType,F1,F2,PeriodicRigidCombType,Td,retVal]
+        result = Referance.GetModalComb_1(Name,MyType,F1,F2,PeriodicRigidCombType,Td)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
     def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
-        pass
+        result = Referance.SetCase(Name)
+        if result != 0:
+            raise ApiReturnError(result)
 
-    def SetEccentricity(self, Referance : object, Name : str) -> None | ApiReturnError:
-        pass
+    def SetEccentricity(self, Referance : object, Name : str, Eccen : float) -> None | ApiReturnError:
+        result = Referance.SetEccentricity(Name, Eccen)
+        if result != 0:
+            raise ApiReturnError(result)
 
-    def SetLoads(self, Referance : object, Name : str) -> None | ApiReturnError:
-        pass
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
+        LoadName = list([])
+        Func = list([])
+        SF = list([])
+        CSys = list([])
+        Ang = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadName,Func,SF,CSys,Ang,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadName,Func,SF,CSys,Ang)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
 
-    def SetModalCase(self, Referance : object, Name : str) -> None | ApiReturnError:
-        pass
+    def SetModalCase(self, Referance : object, Name : str, ModalCase : str) -> None | ApiReturnError:
+        result = Referance.SetModalCase(Name, ModalCase)
+        if result != 0:
+            raise ApiReturnError(result)
 
 class CaseStaticLinear:
 
-    def GetInitialCase(self):
-        pass
+    def GetInitialCase(self, Referance : object, Name : str) -> list | ApiReturnError:
+        InitialCase = str()
+        retVal = 0
+        result = [Name,InitialCase,retVal]
+        result = Referance.GetInitialCase(Name,InitialCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
-    def GetLoads(self):
-        pass
-    def SetCase(self):
-        pass
+    def GetLoads(self, Referance : object, Name : str) -> list | ApiReturnError:
+        NumberLoads = int()
+        LoadType = list([])
+        LoadName = list([])
+        SF = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,SF)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
+    
+    def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
+        result = Referance.SetCase(Name)
+        if result != 0:
+            raise ApiReturnError(result)
  
-    def SetInitialCase(self):
-        pass
+    def SetInitialCase(self, Referance : object, Name : str, InitialCase : str) -> None | ApiReturnError:
+        result = Referance.SetInitialCase(Name,InitialCase)
+        if result != 0:
+            raise ApiReturnError(result)
  
-    def SetLoads(self):
-        pass
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
+        LoadType = list([])
+        LoadName = list([])
+        SF = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,SF)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
 
 class CaseStaticNonlinear:
 
-    def GetGeometricNonlinearity(self):
-        pass
+    def GetGeometricNonlinearity(self, Referance : object, Name : str) -> list | ApiReturnError:
+        NLGeomType = int()
+        retVal = 0
+        result = [Name,NLGeomType,retVal]
+        result = Referance.GetGeometricNonlinearity(Name,NLGeomType)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
 
-    def GetHingeUnloading(self):
-        pass
+    def GetHingeUnloading(self, Referance : object, Name : str) -> list | ApiReturnError:
+        UnloadType = int()
+        retVal = 0
+        result = [Name,UnloadType,retVal]
+        result = Referance.GetHingeUnloading(Name,UnloadType)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetInitialCase(self):
-        pass
+    def GetInitialCase(self, Referance : object, Name : str) -> list | ApiReturnError:
+        InitialCase = str()
+        retVal = 0
+        result = [Name,InitialCase,retVal]
+        result = Referance.GetInitialCase(Name,InitialCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetLoadApplication(self):
-        pass
+    def GetLoadApplication(self, Referance : object, Name : str) -> list | ApiReturnError:
+        LoadControl = int()
+        DispType    = int()
+        Displ       = float()
+        Monitor     = int()
+        DOF         = int()
+        PointName   = str()
+        GDispl      = str()
+        retVal = 0
+        result = [Name,LoadControl,DispType,Displ,Monitor,DOF,PointName,GDispl,retVal]
+        result = Referance.GetLoadApplication(Name,LoadControl,DispType,Displ,Monitor,DOF,PointName,GDispl)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetLoads(self):
-        pass
+    def GetLoads(self, Referance : object, Name : str) -> list | ApiReturnError:
+        NumberLoads = int() 
+        LoadType    = list([])
+        LoadName    = list([]) 
+        SF          = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,SF)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetMassSource(self):
-        pass
+    def GetMassSource(self, Referance : object, Name : str) -> list | ApiReturnError:
+        mSource = str()
+        retVal = 0
+        result = [Name,mSource,retVal]
+        result = Referance.GetMassSource(Name,mSource)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetModalCase(self):
-        pass
+    def GetModalCase(self, Referance : object, Name : str) -> list | ApiReturnError:
+        ModalCase = str()
+        retVal = 0
+        result = [Name,ModalCase,retVal]
+        result = Referance.GetModalCase(Name,ModalCase)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetResultsSaved(self):
-        pass
+    def GetResultsSaved(self, Referance : object, Name : str) -> list | ApiReturnError:
+        SaveMultipleSteps = bool()
+        MinSavedStates = int()
+        MaxSavedStates = int()
+        PositiveOnly = bool()
+        retVal = 0
+        result = [Name,SaveMultipleSteps,MinSavedStates,MaxSavedStates,PositiveOnly,retVal]
+        result = Referance.GetResultsSaved(Name,SaveMultipleSteps,MinSavedStates,MaxSavedStates,PositiveOnly)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetSolControlParameters(self):
-        pass
+    def GetSolControlParameters(self, Referance : object, Name : str) -> list | ApiReturnError:
+        MaxTotalSteps       = int()
+        MaxFailedSubSteps   = int()
+        MaxIterCS   = int()
+        MaxIterNR   = int()
+        TolConvD   = float()
+        UseEventStepping   = bool()
+        TolEventD    = float()
+        MaxLineSearchPerIter   = int()
+        TolLineSearch    = float()
+        LineSearchStepFact    = float()
+        retVal = 0
+        result = [Name,MaxTotalSteps,MaxFailedSubSteps,MaxIterCS,MaxIterNR,TolConvD,UseEventStepping,TolEventD,MaxLineSearchPerIter,TolLineSearch,LineSearchStepFact,retVal]
+        result = Referance.GetSolControlParameters(Name,MaxTotalSteps,MaxFailedSubSteps,MaxIterCS,MaxIterNR,TolConvD,UseEventStepping,TolEventD,MaxLineSearchPerIter,TolLineSearch,LineSearchStepFact)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def GetTargetForceParameters(self):
-        pass
+    def GetTargetForceParameters(self, Referance : object, Name : str) -> list | ApiReturnError:
+        TolConvF = float()
+        MaxIter = int()
+        AccelFact = float()
+        NoStop = bool()
+        retVal = 0
+        result = [Name,TolConvF,MaxIter,AccelFact,NoStop,retVal]
+        result = Referance.GetTargetForceParameters(Name,TolConvF,MaxIter,AccelFact,NoStop)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
+        return result
     
-    def SetCase(self):
-        pass
+    def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
+        result = Referance.SetCase(Name)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetGeometricNonlinearity(self):
-        pass
+    def SetGeometricNonlinearity(self,Referance : object, Name : str, NLGeomType : int) -> None | ApiReturnError:
+        result = Referance.SetGeometricNonlinearity(Name,NLGeomType)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetHingeUnloading(self):
-        pass
+    def SetHingeUnloading(self, Referance : object, Name : str, UnloadType : int) -> None | ApiReturnError:
+        result = Referance.SetHingeUnloading(Name,UnloadType)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetInitialCase(self):
-        pass
+    def SetInitialCase(self, Referance : object, Name : str, InitialCase : str) -> None | ApiReturnError:
+        result = Referance.SetInitialCase(Name,InitialCase)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetLoadApplication(self):
-        pass
+    def SetLoadApplication(self, Referance : object, Name : str, LoadControl : int, DispType : int, Monitor : int, DOF : int, PointName : str, GDispl : str) -> None | ApiReturnError:
+        result = Referance.SetLoadApplication(Name,LoadControl,DispType,Monitor,DOF,PointName,GDispl)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetLoads(self):
-        pass
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
+        LoadType = list([])
+        LoadName = list([])
+        SF = list([])
+        retVal = 0
+        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]
+        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,SF)
+        if result[-1] != 0:
+            raise ApiReturnError(result[-1])
     
-    def SetMassSource(self):
-        pass
+    def SetMassSource(self, Referance : object, Name : str, mSource : str) -> None | ApiReturnError:
+        result = Referance.SetMassSource(Name,mSource)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetModalCase(self):
-        pass
+    def SetModalCase(self, Referance : object, Name : str, ModalCase : str) -> None | ApiReturnError:
+        result = Referance.SetModalCase(Name,ModalCase)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetResultsSaved(self):
-        pass
+    def SetResultsSaved(self, Referance : object, Name : str, SaveMultipleSteps : bool, MinSavedStates : int = 10, MaxSavedStates : int = 100, PositiveOnly : bool = True) -> None | ApiReturnError:
+        result = Referance.SetResultsSaved(Name,SaveMultipleSteps,MinSavedStates,MaxSavedStates,PositiveOnly)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetSolControlParameters(self):
-        pass
+    def SetSolControlParameters(self, Referance : object, Name : str, MaxTotalSteps : int, MaxFailedSubSteps : int, MaxIterCS : int, MaxIterNR : int, TolConvD : float, UseEventStepping : bool, TolEventD : float, MaxLineSearchPerIter : int, TolLineSearch : float, LineSearchStepFact : float) -> None | ApiReturnError:
+        result = Referance.SetSolControlParameters(Name,
+                                                   MaxTotalSteps,
+                                                   MaxFailedSubSteps,
+                                                   MaxIterCS,
+                                                   MaxIterNR,
+                                                   TolConvD,
+                                                   UseEventStepping,
+                                                   TolEventD,
+                                                   MaxLineSearchPerIter,
+                                                   TolLineSearch,
+                                                   LineSearchStepFact)
+        if result != 0:
+            raise ApiReturnError(result)
     
-    def SetTargetForceParameters(self):
-        pass
+    def SetTargetForceParameters(self, Referance : object, Name : str, TolConvF : float, MaxIter : int, AccelFact : float, NoStop : bool) -> None | ApiReturnError:
+        result = Referance.SetTargetForceParameters(Name,TolConvF,MaxIter,AccelFact,NoStop)
+        if result != 0:
+            raise ApiReturnError(result)
 
 class CaseStaticNonlinearStaged:
 
