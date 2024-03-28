@@ -3,7 +3,7 @@
 
 import pytest
 
-from src.Design.Frp import FRPMaterial
+from TSC.Design.Frp import FRPMaterial
 
 
 @pytest.fixture(scope="class")

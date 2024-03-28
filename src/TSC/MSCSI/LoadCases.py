@@ -806,54 +806,163 @@ class CaseStaticNonlinear:
         return result
     
     def SetCase(self, Referance : object, Name : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetCase(Name)
         if result != 0:
             raise ApiReturnError(result)
     
     def SetGeometricNonlinearity(self,Referance : object, Name : str, NLGeomType : int) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+            NLGeomType (int): 
+                                0 : None
+                                1 : P-Delta
+                                2 : P-Delta + Large Disp
+
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetGeometricNonlinearity(Name,NLGeomType)
         if result != 0:
             raise ApiReturnError(result)
     
     def SetHingeUnloading(self, Referance : object, Name : str, UnloadType : int) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+            UnloadType (int): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetHingeUnloading(Name,UnloadType)
         if result != 0:
             raise ApiReturnError(result)
     
     def SetInitialCase(self, Referance : object, Name : str, InitialCase : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+            InitialCase (str): Mevcut nonlinearcase ismi verilirse verilen nonlinearcase öncül olarak çözülür . 'None' girişi yapılırsa direk bu case çözülür.
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetInitialCase(Name,InitialCase)
         if result != 0:
             raise ApiReturnError(result)
     
     def SetLoadApplication(self, Referance : object, Name : str, LoadControl : int, DispType : int, Monitor : int, DOF : int, PointName : str, GDispl : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+            LoadControl (int): _description_
+            DispType (int): _description_
+            Monitor (int): _description_
+            DOF (int): _description_
+            PointName (str): _description_
+            GDispl (str): _description_
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetLoadApplication(Name,LoadControl,DispType,Monitor,DOF,PointName,GDispl)
         if result != 0:
             raise ApiReturnError(result)
     
-    def SetLoads(self, Referance : object, Name : str, NumberLoads : int) -> None | ApiReturnError:
-        LoadType = list([])
-        LoadName = list([])
-        SF = list([])
+    def SetLoads(self, Referance : object, Name : str, NumberLoads : int, LoadType : [str], LoadName : [str], SF : [float]) -> None | ApiReturnError: # type: ignore
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): _description_
+            NumberLoads (int): _description_
+            LoadType (list):  'Load','Acceleration','Mode'
+            LoadName (list): 'Load' için LoadPattern nameler,
+                                'Acceleration' için DOF isimleri
+                                'Mode' için mode isimleri
+            SF (list): Scale faktörler
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         retVal = 0
-        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]
-        result = Referance.GetLoads(Name,NumberLoads,LoadType,LoadName,SF)
+        result = [Name,NumberLoads,LoadType,LoadName,SF,retVal]        
+        result = Referance.SetLoads(Name,NumberLoads,LoadType,LoadName,SF)
         if result[-1] != 0:
             raise ApiReturnError(result[-1])
+        else:
+            print(f"{__class__.SetLoads.__name__} Operation completed...")
     
     def SetMassSource(self, Referance : object, Name : str, mSource : str) -> None | ApiReturnError:
+        """_summary_
+
+        Args:
+            Referance (object): _description_
+            Name (str): Exist load case name
+            mSource (str): Exist mass source name
+
+        Raises:
+            ApiReturnError: _description_
+
+        Returns:
+            None | ApiReturnError: _description_
+        """
         result = Referance.SetMassSource(Name,mSource)
         if result != 0:
             raise ApiReturnError(result)
+        else:
+            print(f"{__class__.SetMassSource.__name__} Operation completed...")
     
     def SetModalCase(self, Referance : object, Name : str, ModalCase : str) -> None | ApiReturnError:
         result = Referance.SetModalCase(Name,ModalCase)
         if result != 0:
             raise ApiReturnError(result)
+        else:
+            print(f"{__class__.SetModalCase.__name__} Operation completed...")
     
     def SetResultsSaved(self, Referance : object, Name : str, SaveMultipleSteps : bool, MinSavedStates : int = 10, MaxSavedStates : int = 100, PositiveOnly : bool = True) -> None | ApiReturnError:
         result = Referance.SetResultsSaved(Name,SaveMultipleSteps,MinSavedStates,MaxSavedStates,PositiveOnly)
         if result != 0:
             raise ApiReturnError(result)
+        else:
+            print(f"{__class__.SetResultsSaved.__name__} Operation completed...")
     
     def SetSolControlParameters(self, Referance : object, Name : str, MaxTotalSteps : int, MaxFailedSubSteps : int, MaxIterCS : int, MaxIterNR : int, TolConvD : float, UseEventStepping : bool, TolEventD : float, MaxLineSearchPerIter : int, TolLineSearch : float, LineSearchStepFact : float) -> None | ApiReturnError:
         result = Referance.SetSolControlParameters(Name,
@@ -1041,19 +1150,30 @@ class LoadCase:
             print("Operation completed...")      
 
 
-def main()->None:
-    from TSC.MSCSI.Connector import ConnectionEtabs
-    from TSC.MSCSI.Model import SapModel
+# def main()->None:
+#     from TSC.MSCSI.Connector import ConnectionEtabs
+#     from TSC.MSCSI.Model import SapModel
 
-    ModelPath="C:\\CSi_ETABS_API_Example\\ETABS_API_Example.EDB"
-    MySapModel,myETABSObject  = ConnectionEtabs(ModelPath)
-    etabs                   = SapModel(RefApi=MySapModel)
-    loadCase        = LoadCase(RefApi=MySapModel.LoadCases)
-    if etabs.GetModelIsLocked():
-        etabs.SetModelIsLocked(Lockit=False)
-    # CaseModalRitz Testing
-    loadCase.ModalRitz.SetCase(Referance=loadCase.RefApi.ModalRitz,Name='Ritz1')
-    pass
+#     ModelPath="C:\\CSi_ETABS_API_Example\\ETABS_API_Example.EDB"
+#     MySapModel,myETABSObject  = ConnectionEtabs(ModelPath)
+#     etabs                   = SapModel(RefApi=MySapModel)
+#     loadCase        = LoadCase(RefApi=MySapModel.LoadCases)
+#     if etabs.GetModelIsLocked():
+#         etabs.SetModelIsLocked(Lockit=False)
+#     # CaseModalRitz Testing
+#     loadCase.ModalRitz.SetCase(Referance=loadCase.RefApi.ModalRitz,Name='Ritz1')
 
-if __name__ == "__main__":
-    main()
+#     # CaseStaticNonlinear Testing
+#     loadCase.StaticNonlinear.SetCase(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase')
+#     # loadCase.StaticNonlinear.SetMassSource(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',mSource='aaa')
+#     # loadCase.StaticNonlinear.SetInitialCase(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',InitialCase='None')
+#     loadCase.StaticNonlinear.SetLoads(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',NumberLoads=2)
+#     loadCase.StaticNonlinear.SetModalCase(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',ModalCase='None')
+#     loadCase.StaticNonlinear.SetGeometricNonlinearity(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',NLGeomType=1)
+#     loadCase.StaticNonlinear.SetLoadApplication(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',LoadControl=1,DispType=1,Monitor=1,DOF=1,PointName='None',GDispl='None')
+#     loadCase.StaticNonlinear.SetResultsSaved(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase',SaveMultipleSteps=True,MinSavedStates=10,MaxSavedStates=100,PositiveOnly=True)
+#     loadCase.StaticNonlinear.SetSolControlParameters(Referance=loadCase.RefApi.StaticNonlinear,Name='TestNonlinearCase', MaxTotalSteps=10,MaxFailedSubSteps=2,MaxIterCS=1,MaxIterNR=1,TolConvD=.1,UseEventStepping=True,TolEventD=1.2,MaxLineSearchPerIter=1,TolLineSearch=.1,LineSearchStepFact=1)
+
+
+# if __name__ == "__main__":
+#     main()

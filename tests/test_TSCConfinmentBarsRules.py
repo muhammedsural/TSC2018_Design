@@ -1,6 +1,6 @@
 import pytest
 import math
-from src.Design.ConfimentBarsRules import ConfimentDesign
+from TSC.Design.ConfimentBarsRules import ConfimentDesign
 
 """Units N,mm"""
 Nd                      = 16000 
