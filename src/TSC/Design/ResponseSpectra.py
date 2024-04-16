@@ -760,7 +760,15 @@ class TimeSeriesSpectra:
                 break
         return round(targetSa,4)
 
-
+    def ChangeTimeSeriesForPGA(TimeSeries : pd.DataFrame,targetPGA : float) -> pd.DataFrame:
+        """ Zaman serisini PGA değerine göre verilen ivme değeri ile orantılayarak yeniden oluşturur."""
+        realPGA = TimeSeries.Acceleration.max()
+        coef = targetPGA/realPGA
+        newTimeSeries = [acc*coef for acc in TimeSeries.Acceleration]
+        TimeSeries["ChangedAcc"] = newTimeSeries
+        del newTimeSeries
+        return TimeSeries
+    
 # def main() ->None:
 #     # SeismicVariables = SeismicInputs(lat = 38.12949,lon = 32.45234,soil = "ZC",intensity = "DD2")
 #     # print(SeismicVariables)

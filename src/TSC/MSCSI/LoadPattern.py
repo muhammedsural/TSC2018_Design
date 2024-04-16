@@ -126,3 +126,55 @@ class LoadPattern:
             raise ApiReturnError(result)
         else:
             print("Operation completed...")
+
+    def SetAutoSeismicASCE716(self,Name : str, nDir : list[bool], Eccen : float, PeriodFlag : int, CtType : int, UserT : float, UserZ : bool, TopZ : float, BottomZ : float, R : float, Omega : float, Cd : float, I : float, Ss : float, S1 : float, TL : float, SiteClass : int, Fa : float, Fv : float)-> None|ApiReturnError:
+        """Defines auto seismic loading parameters for the 2016 ASCE 7 code 
+
+        Args:
+            Name (str): The name of an existing Seismic-type load pattern 
+            nDir (list[bool]): This is an array with 6 inputs that indicates the seismic load directions 
+                                nDir(1) = True = X Dir
+                                nDir(2) = True = Y Dir
+                                nDir(3) = True = X Dir + Eccentricity
+                                nDir(4) = True = Y Dir + Eccentricity
+                                nDir(5) = True = X Dir - Eccentricity
+                                nDir(6) = True = Y Dir - Eccentricity
+            Eccen (float): The eccentricity ratio that applies to all diaphragms
+            PeriodFlag (int): This is 1, 2 or 3, indicating the time period option 
+                                Approximate
+                                Program calculated
+                                User defined
+            CtType (int): This is one of the following values. This item is used only when PeriodFlag is 1 or 2 
+                                0 = Ct = 0.028 (ft), x = 0.8
+                                1 = Ct = 0.016 (ft), x = 0.9
+                                2 = Ct = 0.03 (ft), x = 0.75
+                                3 = Ct = 0.02 (ft), x = 0.75
+            UserT (float): The user specified time period. This item is meaningful when the PeriodFlag item is 3. [s] 
+            UserZ (bool): This item is not used in ETABS 
+            TopZ (float): The global Z-coordinate at the highest level where auto seismic loads are applied. [L] 
+            BottomZ (float): The global Z-coordinate at the lowest level where auto seismic loads are applied. [L]
+            R (float): The response modification factor 
+            Omega (float): The system overstrength factor 
+            Cd (float): The deflection amplification factor 
+            I (float): The occupancy importance factor
+            Ss (float): The seismic coefficients Ss
+            S1 (float): The seismic coefficients S1 
+            TL (float): The long-period transition period. [s]
+            SiteClass (int): This is 1, 2, 3, 4, 5 or 6, indicating the site class 
+                                A
+                                B
+                                C
+                                D
+                                E
+                                F
+            Fa (float): The site coefficients Fa. This item is used only when the SiteClass item is 5 or 6
+            Fv (float): The site coefficients Fv. This item is used only when the SiteClass item is 5 or 6 
+
+        Returns:
+            None|ApiReturnError: _description_
+        """
+        result = self.RefApi.AutoSeismic.SetASCE716(Name,nDir, Eccen, PeriodFlag, CtType, UserT, UserZ, TopZ, BottomZ, R, Omega, Cd, I, Ss, S1, TL, SiteClass, Fa, Fv)
+        if result != 0:
+            raise ApiReturnError(result)
+        else:
+            print("Operation completed...")
