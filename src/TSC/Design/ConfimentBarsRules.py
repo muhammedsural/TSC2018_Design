@@ -39,12 +39,19 @@ class ConfimentDesign:
 
         
     def Set_Variables(self) -> None:
+        RebarCheck = self.CheckConfinmendRebarDiameter(ConfRebarDia=self.ConfimentRebarDiameter, LongRebarDia=self.LongnitudeRebarDiameter)
+        if RebarCheck != True:
+            return None
         self.Ac                  = self.GetAc(self.Height,self.Width)
         self.Ack                 = self.GetAck(self.Height,self.Width,self.Cover)
         self.bkx                 = self.Get_bk(self.Width,self.Cover)
         self.bky                 = self.Get_bk(self.Height,self.Cover)
         self.ax                  = self.Get_a_i(self.bkx,self.Xkol)
+        GeomCheck                = self.Check_a_i(ai=self.ax , confrebardia=self.ConfimentRebarDiameter)
         self.ay                  = self.Get_a_i(self.bky,self.Ykol)
+        GeomCheck                = self.Check_a_i(ai=self.ay , confrebardia=self.ConfimentRebarDiameter)
+        if GeomCheck != True:
+            return None
         ConfRebarArea            = self.GetRebarArea(self.ConfimentRebarDiameter)
         self.Ashx                = self.GetAshw_i(self.Xkol,ConfRebarArea)
         self.Ashy                = self.GetAshw_i(self.Ykol,ConfRebarArea)
@@ -53,7 +60,7 @@ class ConfimentDesign:
         bmax                     = max(self.Height,self.Width)
         
         self.EndConfLength       = self.Get_EndRegionConfinmentLength(bmax,self.Ln)
-        self.Lb                  = self.Get_lb(self.Fsy, self.Fctd, self.LongnitudeRebarDiameter)
+        self.Lb                  = self.Get_lb(self.Fsy, self.Fctd, self.LongnitudeRebarDiameter, Nervur=True, LocationClass=1)
         self.MidConfLength       = self.Lb
         self.OtherConfLength     = self.Ln - 2 * self.EndConfLength - self.MidConfLength
 
@@ -151,12 +158,15 @@ class ConfimentDesign:
             return False
         return True
 
-    def Check_a_i(self,ai : float,confrebardia : float):
-        if ai > 25*(confrebardia/10):
+    def Check_a_i(self,ai : float,confrebardia : float) -> bool:
+        if ai > 25*(confrebardia):
             print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai}mm > {25*confrebardia}mm - TBDY-7.3.4.2")
+            return False
 
         if ai > 300:
             print(f"İlgili doğrultuda kol aralığı izin verilenin sınırın üstünde {ai}mm > 300mm - TS500 7.4.1")
+            return False
+        return True
             
     def CheckNd(self,Nd : float,Ac : float, fck : float) -> bool:
         """Nd değerinin (0.2 * Ac * fck) değerinden büyük veya küçük eşit olma durumunu inceler. Büyükse False küçükse True döndürür.
@@ -192,10 +202,12 @@ class ConfimentDesign:
         s4 = 6 * LongRebar  # TBDY2018
         s5 = 12 * LongRebar # TS500
         s_max = min(s2,s3,s4,s5)
-
+        print(f"Uç sarılma bölgesi şartları ==> \ns1 = {round(s1,1)}mm, \ns2 = {round(s2,1)}mm, \ns3 = {b_min}/3 = {round(s3,1)}mm, \ns4 = 6 * {LongRebar} = {round(s4,1)}mm, \ns5 = 12 * {LongRebar} = {round(s5,1)}mm \n==> smax = min(s2,s3,s4,s5) = {round(s_max,1)}mm")
+        
         if s_max < s1 :
+            print(f"{s_max} < {s1} olamaz bu nedenle uygulanabilecek etriye aralığı {s1} alınmıştır.")
             s_max = s1
-
+        print("=="*50+"\n")
         return s_max
 
     def OrtaSarilmaBolgesiKontrolleri(self,b_min : float,LongRebar : int) -> float:
@@ -204,7 +216,8 @@ class ConfimentDesign:
         s3 = 12 * LongRebar # TS500
         # s4 = 6 * LongRebar # TBDY2018
         s_max = min(s1,s2,s3)
-
+        print(f"Orta sarılma bölgesi şartları ==> \ns1 = {round(s1,1)}mm, \ns2 = {b_min} / 3 = {round(s2,1)}mm, \ns3 = 12 * {LongRebar}  = {round(s3,1)}mm \n==> smax = min(s1,s2,s3) = {round(s_max,1)}mm")
+        print("=="*50+"\n")
         return s_max
 
     def DigerSarilmaBolgesiKontrolleri(self, b_min : float,LongRebar : int) -> float:
@@ -212,6 +225,8 @@ class ConfimentDesign:
         s2 = b_min/2
         s3 = math.floor(12 * LongRebar) # TS500
         s_max = min(s1,s2,s3)
+        print(f"Sarılma bölgesi dışı şartları ==> \ns1 = {round(s1,1)}mm, \ns2 = {b_min} / 2 = {round(s2,1)}mm, \ns3 = 12 * {LongRebar}  = {round(s3,1)}mm \n==> smax = min(s1,s2,s3) = {round(s_max,1)}mm")
+        print("=="*50+"\n")
         return s_max
     
     def MinEnineDonatiOraniDikdörtgen(self,s : float, b_kx : float,b_ky : float, Ac : float, Ack : float, fck : float, fywk : float,NdControl : bool) -> float:
@@ -245,6 +260,22 @@ class ConfimentDesign:
         return Ash
 
     def OptimizeConfinmentRebarSpace(self,smax : float,Ash : float, Nd : float, Ac : float, fck : float, fywk : float, Ack : float, bkx : float, bky : float) -> int:
+        """Kesitte atılabilecek optimize etriye aralığını herhangi bir bölge olabilir
+
+        Args:
+            smax (float): Maximum atılabilecek etriye aralığı
+            Ash (float): Enine donatı oranı
+            Nd (float): Eksenel kuvvet N
+            Ac (float): Kesit alanı
+            fck (float): Karakteristik basınç dayanımı
+            fywk (float): Enine donatı akma gerilmesi MPa
+            Ack (float): Çekirdek beton alanı mm2
+            bkx (float): çekirdek beton genişliği
+            bky (float): Çekirdek beton yüksekliği
+
+        Returns:
+            int: Etriye aralığı
+        """
         s    = [i for i in range(50,210)]   # cm
         s_ideal = 0
         for s_opt in s :
@@ -256,8 +287,7 @@ class ConfimentDesign:
                 if s_opt == 50:
                     #info :  İlk iterasyonda Ash_min değerinin altında kalıyorsa diğerlerinde zaten sağlayamaz s_opt değeri 50mm e eşitlenip uyarı verilir.
                     print(f"Ash = {Ash}mm2 < Ash_min = {Ashmin_dikd}mm2 kesitteki çiroz,etriye arttırılmalı ve/veya sargı donatı çapı büyütülmeli...")
-                    break
-                s_ideal = s_opt
+                    s_ideal = 50
                 break
             s_ideal = s_opt
 
@@ -279,23 +309,31 @@ class ConfimentDesign:
         Returns:
             _type_: kenetlenme boyu
         """
-        # 
         
         lb = 0.12 * (fsy/fctd) * LognRebarDia
-        minlimit = 20 * LognRebarDia
+        print(f"Lb = 0.12 * (fsy/fctd) * LognRebarDia = 0.12 * {(fsy/fctd)} * {LognRebarDia} = {lb}mm")
+        
+        minlimit = 20 * LognRebarDia # Bu sınır TS500 de 20 * fi_boyunadonatı dır.
         
         if lb < minlimit :
+            print(f"Lb = {lb} < {minlimit} = 20*LognRebarDia ==> Lb = {minlimit} \n")
             lb = minlimit
         
         if LocationClass == 1 :
+            print(f"LocationClass = 1 < ==> Lb = 1.4 * Lb = {1.4*lb} \n")
             lb = 1.4 * lb
             
         if LocationClass != 1 and LocationClass != 2:
-            raise ValueError("Konum tanımı 1 veya 2 olmalıdır...")
+            raise ValueError("Konum tanımı 1 veya 2 olmalıdır...\n")
         
         if Nervur != True:
+            print(f"Boyuna donatı nervürsüz ==> Lb = 2 * Lb = {2*lb} ")
             lb = 2 * lb
-        
+
+        if lb < 40 * LognRebarDia:
+            lb = 40 * LognRebarDia # ACI19 - R25.4.2.3 de ilgili configirasyonda 47 db minimum boy çıkmaktadır. TS için 40 db gelmektedir.
+
+        print("=="*50+"\n")
         return lb
     
     def Get_EndRegionConfinmentLength(self, b_max : float, ln : float):
@@ -312,6 +350,8 @@ class ConfimentDesign:
         l2 = 500
         l3 = ln/6
         l = max(l1,l2,l3)
+        print(f"Uç sarılma bölgesi uzunluk şartları ==> \nL1 = 1.5 * b_max = 15 * {b_max} = {round(l1,1)}mm, \nL2 = {round(l2,1)}mm, \nL3 = Ln/6 = {ln}/6 = {round(l3,1)}mm \n==> Lmax = max(L1,L2,L3) = {round(l,1)}mm")
+        print("=="*50+"\n")
         return l
     
     def Get_DesignConfinment(self,
@@ -348,5 +388,22 @@ class ConfimentDesign:
         EtriyeAdeti = 2*UcSarilmaBolgesiEtriyeAdeti + OrtaSarilmaBolgesiEtriyeAdeti + SarilmaBolgesiDisindaEtriyeAdeti
         print(f"Kolon Serbest Bölgesindeki Etriye Adeti - Etriye Çapi / SarılmaDışıAralık / OrtaSarılmadakiAralık / UçSarılmaAralık = {EtriyeAdeti} - ∅{TieRebarDiameter} / {math.floor(s_OtherConfAreaMax/10)} / {math.floor(s_OptMiddleConfArea/10)} / {math.floor(s_OptEndConfArea/10)}")
         
-        
 
+
+# if __name__ == "__main__":
+#     Cbar = ConfimentDesign(
+#                             Nd                      = 22703.2*10**4,
+#                             Fsy                     = 420 ,
+#                             Fctd                    = 2.1,
+#                             Ln                      = 2200,            
+#                             Width                   = 450,
+#                             Height                  = 400,
+#                             Cover                   = 23,
+#                             Xkol                    = 4,
+#                             Ykol                    = 3,
+#                             Fck                     = 35,
+#                             Fywk                    = 420,
+#                             ConfimentRebarDiameter  = 10,
+#                             LongnitudeRebarDiameter = 14)
+#     Cbar.Set_Variables()
+#     print(f"Uç sarılma bölgesi uzunluğu = {Cbar.EndConfLength}, Orta sarılma bölgesi uzunluğu = {Cbar.MidConfLength}, Kalan uzunluk = {Cbar.OtherConfLength}")
